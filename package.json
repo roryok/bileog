@@ -1,0 +1,43 @@
+{
+  "name": "bileog",
+  "version": "0.1.0",
+  "description": "A distraction-free story writing app for kids",
+  "main": "./out/main/index.js",
+  "author": {
+    "name": "Rory O'Kelly",
+    "email": "roryok@gmail.com"
+  },
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "dist": "npm run typecheck && electron-vite build && electron-builder --mac --arm64",
+    "dist:dir": "electron-vite build && electron-builder --mac --arm64 --dir"
+  },
+  "dependencies": {
+    "@tiptap/core": "^2.27.2",
+    "@tiptap/extension-placeholder": "^2.27.2",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
+    "better-sqlite3": "^11.8.1",
+    "nanoid": "^5.0.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.3.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.14"
+  }
+}

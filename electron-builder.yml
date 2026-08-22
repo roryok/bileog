@@ -1,0 +1,73 @@
+appId: com.roryok.bileog
+productName: Bileog
+copyright: Copyright © 2026 Rory O'Kelly
+
+directories:
+  buildResources: build
+  output: dist
+
+# Negation-only patterns so electron-builder's defaults (which pull in
+# production node_modules) still apply.
+files:
+  - '**/*'
+  - '!src/*'
+  - '!out/**/*.map'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!tsconfig*.json'
+  - '!**/*.tsbuildinfo'
+  - '!.claude/*'
+  # The renderer is fully bundled by Vite and the main process externalises only
+  # better-sqlite3 and nanoid, so nothing else in node_modules is reachable at
+  # runtime. Shipping the rest would bloat the bundle and, more importantly,
+  # drag ~105 packages of third-party licensing into a released binary for no
+  # reason - including install-time HTTP clients pulled in by prebuild-install.
+  - '!node_modules/**'
+  - 'node_modules/better-sqlite3/**'
+  - 'node_modules/bindings/**'
+  - 'node_modules/file-uri-to-path/**'
+  - 'node_modules/nanoid/**'
+
+# The SIL OFL requires its license text to accompany the bundled fonts, and the
+# Pexels attribution should travel with the app too. Vite only emits the .woff2
+# files, so these are copied in explicitly.
+extraResources:
+  - from: LICENSE
+    to: licenses/LICENSE
+  - from: NOTICE
+    to: licenses/NOTICE
+  - from: src/renderer/src/fonts/OFL-Baloo2.txt
+    to: licenses/OFL-Baloo2.txt
+  - from: src/renderer/src/fonts/OFL-Quicksand.txt
+    to: licenses/OFL-Quicksand.txt
+  # Electron does not copy these into the .app on macOS, but Chromium is
+  # BSD-3-Clause and its dependencies require notice retention, so a
+  # redistributed binary has to carry them.
+  - from: node_modules/electron/dist/LICENSE
+    to: licenses/LICENSE.electron
+  - from: node_modules/electron/dist/LICENSES.chromium.html
+    to: licenses/LICENSES.chromium.html
+
+# better-sqlite3 is a native .node addon: it must live on the real filesystem,
+# not inside app.asar, or dlopen() can't load it.
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
+
+mac:
+  category: public.app-category.education
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  # No Developer ID cert available, so ad-hoc sign ("-") instead. This produces a
+  # valid signature so the arm64 app will launch, but it is not notarized, so the
+  # receiving Mac has to clear the quarantine flag once (see INSTALL.md).
+  identity: '-'
+  # Hardened runtime only matters for notarization, and it blocks ad-hoc-signed
+  # apps from loading the better-sqlite3 addon (library validation).
+  hardenedRuntime: false
+  darkModeSupport: true
+  extendInfo:
+    NSHumanReadableCopyright: Copyright © 2026 Rory OK
+
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}

@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipping Bileog - release roadmap</title>
+<link rel="icon" type="image/svg+xml" href="src/assets/icons/leaf.svg">
+<style>
+  /* reset */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body, h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; }
+  img { max-width: 100%; display: block; }
+
+  /* tokens */
+  :root {
+    --paper:      #F1F3EE;
+    --surface:    #FBFCFA;
+    --ink:        #16211B;
+    --ink-soft:   #55655C;
+    --ink-faint:  #7D8C84;
+    --rule:       #D8DED6;
+    --accent:     #2F6B4F;
+    --accent-tint:#E4EDE6;
+    --amber:      #8A6011;
+    --amber-tint: #F2E9D5;
+    --rust:       #9E3B2C;
+    --rust-tint:  #F3E2DE;
+    --code-bg:    #E7EBE4;
+  }
+  :root { color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:      #0F1512;
+      --surface:    #161D19;
+      --ink:        #E7EEE8;
+      --ink-soft:   #99A99F;
+      --ink-faint:  #74847B;
+      --rule:       #2A342E;
+      --accent:     #7FBF95;
+      --accent-tint:#1C2B22;
+      --amber:      #D9A441;
+      --amber-tint: #2A2415;
+      --rust:       #E0705C;
+      --rust-tint:  #2C1B17;
+      --code-bg:    #1B241E;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 0.12em 0.38em;
+    border-radius: 3px;
+    word-break: break-word;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* ---------- masthead ---------- */
+  header.masthead {
+    padding: 72px 0 0;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 34px;
+  }
+  .eyebrow {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-weight: 400;
+    font-size: clamp(38px, 6vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  /* ---------- locked decisions ---------- */
+  .locked {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    margin: 34px 0 0;
+    overflow: hidden;
+  }
+  .locked div { background: var(--surface); padding: 14px 16px; }
+  .locked dt {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin: 0 0 5px;
+    font-weight: 600;
+  }
+  .locked dd { margin: 0; font-weight: 600; font-size: 15px; }
+
+  /* ---------- sections ---------- */
+  h2 {
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-weight: 400;
+    font-size: 27px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  section { margin-top: 60px; }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+    margin-bottom: 26px;
+  }
+  .numeral {
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+    opacity: 0.55;
+  }
+  .phase-meta {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: right;
+    flex: none;
+    line-height: 1.4;
+  }
+
+  /* ---------- steps ---------- */
+  ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+  ol.steps > li {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 0 14px;
+    align-items: start;
+  }
+  .tick {
+    width: 22px; height: 22px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--ink-faint);
+    background: var(--surface);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tick.done { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .step-title { font-weight: 650; margin: 0 0 4px; }
+  .step-body { margin: 0; color: var(--ink-soft); }
+  .step-body + .step-body, .step-body + pre, p + pre { margin-top: 10px; }
+  .step-extra { grid-column: 2; }
+
+  /* ---------- chips ---------- */
+  .chip {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    vertical-align: 2px;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  .chip.done   { background: var(--accent-tint); color: var(--accent); }
+  .chip.you    { background: var(--amber-tint);  color: var(--amber); }
+  .chip.block  { background: var(--rust-tint);   color: var(--rust); }
+
+  /* ---------- blockers ---------- */
+  .blockers { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+  .blocker { background: var(--surface); padding: 18px 20px; border-bottom: 1px solid var(--rule); }
+  .blocker:last-child { border-bottom: none; }
+  .blocker h3 { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
+  .blocker p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  .blocker p + p { margin-top: 8px; }
+
+  /* ---------- table ---------- */
+  .scroller { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; background: var(--surface); font-size: 14.5px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em;
+    color: var(--ink-faint); font-weight: 700; white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td strong { font-weight: 650; }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  footer {
+    margin-top: 64px; padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-faint); font-size: 13.5px;
+  }
+  ul.plain { margin: 10px 0 0; padding-left: 20px; color: var(--ink-soft); }
+  ul.plain li { margin-bottom: 5px; }
+
+  @media (max-width: 620px) {
+    header.masthead { padding-top: 44px; }
+    .phase-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Release plan · updated 21 August 2026</p>
+  <h1>Shipping Bileog</h1>
+  <p class="standfirst">Open sourcing the app, then getting it into the Mac App Store, the Microsoft Store, and Flathub - in dependency order, cheapest and fastest first.</p>
+
+  <dl class="locked">
+    <div><dt>App ID</dt><dd class="mono">com.roryok.bileog</dd></div>
+    <div><dt>License</dt><dd>MIT</dd></div>
+    <div><dt>Apple Developer</dt><dd>Enrolled</dd></div>
+    <div><dt>Current build</dt><dd>0.1.0 · arm64 DMG</dd></div>
+  </dl>
+</header>
+
+<section>
+  <div class="phase-head">
+    <h2>Fix before any store sees it</h2>
+  </div>
+  <p style="margin-top:-8px;color:var(--ink-soft);max-width:62ch;">Four things would have failed review or shipped visibly broken. Three are now fixed; the last one is yours and gates everything downstream.</p>
+
+  <div class="blockers" style="margin-top:22px;">
+    <div class="blocker">
+      <h3>The icon was only 512×512 <span class="chip done">Fixed</span></h3>
+      <p>You supplied new artwork - a flat oak-leaf illustration as SVG, 1024 and 512 PNG. It replaces the earlier photographic cutout, which is now unreferenced.</p>
+      <p>The traced SVG carried an opaque white square behind the leaf, which would have shown as a white tile in the macOS dock and on Linux dark themes. Removed, and verified the leaf renders intact without it. The generated <code>.icns</code> now has every slot through 512@2x&nbsp;=&nbsp;1024.</p>
+    </div>
+    <div class="blocker">
+      <h3>Two fonts were referenced but never bundled <span class="chip done">Fixed</span></h3>
+      <p><code>styles.css</code> asked for <code>'Baloo 2'</code> and <code>'Quicksand'</code>, but no font files shipped and nothing fetched them. Neither is installed on your Mac either - so the app had <em>never</em> rendered in its intended typefaces, in dev or in the build. It was falling back to Trebuchet MS throughout.</p>
+      <p><strong>Fixed:</strong> both vendored as WOFF2 variable fonts (113&nbsp;KB for latin + latin-ext), loaded via <code>@font-face</code>. Verified loading in the packaged app. Note this visibly changes the UI - it now looks the way the stylesheet always intended.</p>
+    </div>
+    <div class="blocker">
+      <h3>Bundled photos need provenance <span class="chip done">Done</span></h3>
+      <p>17 cover photos and 5 backgrounds come from Pexels. The Pexels License permits bundling but is not an OSS license, so they sit outside MIT. Flathub reviewers do check this.</p>
+      <p>I wrote <code>NOTICE</code> covering all 22 files. One gap remains: <code>leaf.png</code>'s origin is unknown - confirm you made it, or replace it, before publishing.</p>
+    </div>
+    <div class="blocker">
+      <h3>The project isn't under version control <span class="chip you">You</span></h3>
+      <p>There's no <code>.git</code> directory yet, so there's no history to open source. Everything downstream - CI, Flathub's manifest pointing at a tagged commit, release automation - depends on this existing first.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="phase-head">
+    <span class="numeral">1</span>
+    <h2>Open source foundation</h2>
+    <span class="phase-meta">~1 evening<br>No accounts needed</span>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">MIT license and asset notice <span class="chip done">Done</span></p>
+        <p class="step-body">Wrote <code>LICENSE</code> (MIT, © 2026 Rory O'Kelly) and <code>NOTICE</code> documenting the Pexels assets separately from the code license.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">Ignore local and build artifacts <span class="chip done">Done</span></p>
+        <p class="step-body">Added <code>*.tsbuildinfo</code> and <code>.claude/settings.local.json</code> to <code>.gitignore</code> - both were sitting untracked in the project root.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">3</span>
+      <div>
+        <p class="step-title">Initialise the repo and push <span class="chip you">You</span></p>
+        <p class="step-body">Public repo named <code>bileog</code>. Everything downstream references it - Flathub's manifest, the Microsoft Store listing, the App Store support URL.</p>
+        <pre><code>git init -b main
+git add -A
+git commit -m "Initial commit: Bileog 0.1.0"
+gh repo create roryok/bileog --public --source=. --push</code></pre>
+      </div>
+    </li>
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">README with real build instructions <span class="chip done">Done</span></p>
+        <p class="step-body">What the app is, a screenshot, <code>npm install</code> / <code>npm run dev</code> / <code>npm run dist</code>, and where data lives (<code>~/Library/Application Support/bileog/</code>). Reviewers on all three stores read this.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">CI on GitHub Actions <span class="chip done">Done</span></p>
+        <p class="step-body">Wrote <code>.github/workflows/ci.yml</code>: typecheck and build across <code>macos-14</code>, <code>windows-latest</code> and <code>ubuntu-latest</code> with <code>fail-fast: false</code>, plus a macOS packaging job that asserts the bundle is signed and that the native addon landed outside the asar.</p>
+        <p class="step-body">This is also how you get a Windows build without owning a Windows machine - and the first run will be the first time this code has ever compiled on Windows or Linux.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">6</span>
+      <div>
+        <p class="step-title">Privacy policy</p>
+        <p class="step-body">Both Apple and Microsoft require a hosted URL. Yours is unusually easy: the app has zero network calls, a strict CSP, and no telemetry - everything stays in <code>userData</code>. A short page on <code>roryok.com</code> stating "collects nothing, sends nothing" is accurate and sufficient.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <div class="phase-head">
+    <span class="numeral">2</span>
+    <h2>Shared release prep</h2>
+    <span class="phase-meta">~1–2 days<br>Feeds all three stores</span>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">Unify the app ID <span class="chip done">Done</span></p>
+        <p class="step-body">Changed from <code>com.roryokelly.bileog</code> to <code>com.roryok.bileog</code> in <code>electron-builder.yml</code>, matching the domain you control. Safe to change now: Electron derives <code>userData</code> from the app <em>name</em>, not the ID, so existing stories are unaffected. Changing it after any store release would be far messier.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">Vector icon → every required size <span class="chip done">macOS done</span></p>
+        <p class="step-body">macOS is finished: <code>build/icon.png</code> is the 1024 master, and the generated <code>.icns</code> carries all eleven slots. <code>leaf_1024.png</code> also serves as the App Store Connect listing icon as-is.</p>
+        <p class="step-body">Remaining sizes are cheap and belong with their own store: the MSIX logo set in the Microsoft Store phase, and the 128/256/512 PNGs plus the cleaned SVG in the Flathub phase.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick done">✓</span>
+      <div>
+        <p class="step-title">Bundle Baloo 2 and Quicksand <span class="chip done">Done</span></p>
+        <p class="step-body">Latin and latin-ext WOFF2 subsets straight from Google Fonts, unmodified, so Quicksand's Reserved Font Name isn't implicated. The existing <code>default-src 'self'</code> covers them with no CSP change.</p>
+        <p class="step-body">The OFL requires its license text to travel with the fonts, so <code>extraResources</code> now ships <code>LICENSE</code>, <code>NOTICE</code> and both OFL files into <code>Contents/Resources/licenses/</code> - they were missing from the bundle because <code>files</code> excludes <code>src/</code>.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">4</span>
+      <div>
+        <p class="step-title">Screenshots</p>
+        <p class="step-body">All three stores want them, at different sizes. Capture once at high resolution and crop per store. Shoot the dashboard, the editor mid-story, and the version timeline - with real, kid-plausible story content, not lorem.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">5</span>
+      <div>
+        <p class="step-title">Settle on a version and tag</p>
+        <p class="step-body">Ship <code>1.0.0</code>, not <code>0.1.0</code> - the Microsoft Store requires a four-part version and Apple rejects builds that look like previews. Tag it; CI builds all three artifacts from that tag.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <div class="phase-head">
+    <span class="numeral">3</span>
+    <h2>Flathub</h2>
+    <span class="phase-meta">Free · review by volunteers<br>Do this one first</span>
+  </div>
+  <p style="margin-top:-6px;color:var(--ink-soft);max-width:62ch;">Cheapest, fully in the open, and the review feedback is genuinely useful before you face Apple's. It's also the most technically distinctive of the three, because the build runs offline in a sandbox.</p>
+
+  <ol class="steps" style="margin-top:22px;">
+    <li>
+      <span class="tick">1</span>
+      <div>
+        <p class="step-title">Manifest on the Electron base app</p>
+        <p class="step-body"><code>com.roryok.bileog.yml</code> built on <code>org.freedesktop.Platform</code> with <code>org.electronjs.Electron2.BaseApp</code>, which supplies the Chromium runtime libraries.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">2</span>
+      <div>
+        <p class="step-title">Vendor npm dependencies for an offline build</p>
+        <p class="step-body">The single most common reason Electron submissions stall. Flatpak builds have <em>no network</em>, so <code>npm install</code> cannot run. Generate a sources manifest ahead of time:</p>
+        <pre><code>flatpak-node-generator npm package-lock.json -o generated-sources.json</code></pre>
+        <p class="step-body">Watch <code>better-sqlite3</code> specifically - it must compile from source inside the sandbox rather than downloading a prebuilt binary, so the manifest needs Python and the build toolchain available.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">3</span>
+      <div>
+        <p class="step-title">AppStream metainfo and desktop entry</p>
+        <p class="step-body"><code>com.roryok.bileog.metainfo.xml</code> - summary, description, screenshots with captions, <code>&lt;content_rating type="oars-1.1"/&gt;</code> (all-null for this app), and a release entry. Plus <code>com.roryok.bileog.desktop</code>. Filenames must match the app ID exactly. Validate locally with <code>appstreamcli validate</code> before submitting.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">4</span>
+      <div>
+        <p class="step-title">Sandbox permissions - keep them minimal</p>
+        <p class="step-body">Request no network at all. For file access, prefer the portal-backed file chooser over blanket <code>--filesystem=home</code>; your two dialogs (cover picker, story export) work through it. A tight permission set gets a faster review and earns the app a better privacy badge on the store page.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">5</span>
+      <div>
+        <p class="step-title">Submit the pull request <span class="chip you">You</span></p>
+        <p class="step-body">Open a PR against <a href="https://github.com/flathub/flathub">flathub/flathub</a> adding the manifest. A volunteer reviews it; expect comments and a round or two of changes. On approval you get a dedicated repo with write access, and future updates are PRs there.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">6</span>
+      <div>
+        <p class="step-title">Verify ownership of roryok.com <span class="chip you">You</span></p>
+        <p class="step-body">Because the ID is <code>com.roryok.bileog</code>, Flathub verifies you via the domain - a DNS TXT record or a <code>.well-known</code> file on <code>roryok.com</code>. This is exactly why the ID had to be settled first. Verified apps get a checkmark on the listing.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <div class="phase-head">
+    <span class="numeral">4</span>
+    <h2>Microsoft Store</h2>
+    <span class="phase-meta">Free to register<br>Needs a Windows build</span>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <span class="tick">1</span>
+      <div>
+        <p class="step-title">Open a Partner Center account <span class="chip you">You</span></p>
+        <p class="step-body">Microsoft has waived the old $19 individual registration fee - accounts are now free for individuals and companies alike. Registration replaced credit-card gating with identity verification (government ID plus a selfie), so budget a day or two for approval.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">2</span>
+      <div>
+        <p class="step-title">Reserve the name "Bileog" <span class="chip you">You</span></p>
+        <p class="step-body">Do this the moment the account is live, before any build work. Reserving is free and instant, and it locks the identity values you'll need next.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">3</span>
+      <div>
+        <p class="step-title">First Windows build of the app</p>
+        <p class="step-body">Nothing here has ever run on Windows, so treat this as real porting work rather than a config change. <code>better-sqlite3</code> needs a win32 rebuild; the <code>bileog-media://</code> protocol handler and every <code>join()</code> path need checking against backslash separators. Build on a <code>windows-latest</code> runner.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">4</span>
+      <div>
+        <p class="step-title">Package as MSIX</p>
+        <p class="step-body">electron-builder's <code>appx</code> target, with <code>identityName</code>, <code>publisher</code>, and <code>publisherDisplayName</code> copied exactly from Partner Center - a mismatch is the classic rejection. The Store re-signs your package, so you don't need your own code-signing certificate.</p>
+        <p class="step-body">If MSIX fights you, the Store also accepts a plain <code>.exe</code>/<code>.msi</code> installer, which is a much shorter path for a first release.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">5</span>
+      <div>
+        <p class="step-title">Submit with an age rating</p>
+        <p class="step-body">Fill in the IARC questionnaire. An offline writing app with no ads, no chat, and no data collection rates for all ages - say so plainly and the rating comes back clean.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <div class="phase-head">
+    <span class="numeral">5</span>
+    <h2>Mac App Store</h2>
+    <span class="phase-meta">$99/yr · already enrolled<br>Most work of the three</span>
+  </div>
+  <p style="margin-top:-6px;color:var(--ink-soft);max-width:62ch;">Last, because it demands the most change: App Sandbox is mandatory, and it's a different build of Electron from the one you're shipping today.</p>
+
+  <ol class="steps" style="margin-top:22px;">
+    <li>
+      <span class="tick">1</span>
+      <div>
+        <p class="step-title">Certificates, App ID, provisioning profile <span class="chip you">You</span></p>
+        <p class="step-body">In the developer portal: a <em>Mac App Distribution</em> and a <em>Mac Installer Distribution</em> certificate, an App ID of <code>com.roryok.bileog</code>, and a Mac App Store provisioning profile saved as <code>build/embedded.provisionprofile</code>. Note these are different certificates from the "Apple Development" one already in your keychain - that one can't sign for distribution.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">2</span>
+      <div>
+        <p class="step-title">Switch to the <code>mas</code> target</p>
+        <p class="step-body">Only the MAS build of Electron can run under App Sandbox, and electron-builder fetches it for you. Keep <code>hardenedRuntime: false</code> here - that's a Developer ID concern, not a MAS one - and set <code>type: distribution</code>. The existing ad-hoc DMG config stays as-is for direct downloads.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">3</span>
+      <div>
+        <p class="step-title">Two entitlements files</p>
+        <p class="step-body">Your app needs a strikingly short list, because it never touches the network:</p>
+        <pre><code>com.apple.security.app-sandbox                    true
+com.apple.security.files.user-selected.read-write true</code></pre>
+        <p class="step-body">The second covers both file dialogs - the cover-image picker and the story export - which reach files through macOS's powerbox and work fine under sandbox. A matching <code>*.inherit.plist</code> signs the frameworks and helper processes. Deliberately absent: any network entitlement.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">4</span>
+      <div>
+        <p class="step-title">Verify SQLite and PDF export under sandbox</p>
+        <p class="step-body">Two things to actually run, not assume. Sandboxing redirects <code>userData</code> into a container path, so confirm <code>better-sqlite3</code> still opens the database and WAL mode works there. Then confirm the hidden <code>BrowserWindow</code> used for <code>printToPDF</code> still renders - child processes need the inherited entitlements to launch at all.</p>
+      </div>
+    </li>
+    <li>
+      <span class="tick">5</span>
+      <div>
+        <p class="step-title">App Store Connect listing <span class="chip you">You</span></p>
+        <p class="step-body">Create the record, upload via Transporter, then fill in privacy labels - yours is the rare honest "Data Not Collected" across every category. Rate it 4+.</p>
+        <p class="step-body">One judgement call: the <strong>Kids</strong> category brings extra scrutiny (parental gates, no third-party analytics) but also real discoverability for exactly your audience. Bileog already complies by construction. Worth taking, but expect a longer first review.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <div class="phase-head">
+    <h2>The three at a glance</h2>
+  </div>
+  <div class="scroller">
+    <table>
+      <thead>
+        <tr><th>Store</th><th>Cost</th><th>Package</th><th>Hardest part</th><th>Review</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Flathub</strong></td>
+          <td>Free</td>
+          <td>Flatpak</td>
+          <td>Offline build - no <code>npm install</code> at build time</td>
+          <td>Days–weeks, volunteer</td>
+        </tr>
+        <tr>
+          <td><strong>Microsoft Store</strong></td>
+          <td>Free</td>
+          <td>MSIX or installer</td>
+          <td>App has never run on Windows</td>
+          <td>~1–3 days</td>
+        </tr>
+        <tr>
+          <td><strong>Mac App Store</strong></td>
+          <td>$99/yr</td>
+          <td>MAS <code>.pkg</code></td>
+          <td>App Sandbox + entitlements</td>
+          <td>~1–2 days</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="phase-head">
+    <h2>Why this order</h2>
+  </div>
+  <p style="color:var(--ink-soft);max-width:62ch;margin-top:-6px;">Flathub first isn't about it being easiest - it isn't. It's that its review is public, thorough, and free, so it surfaces packaging and metadata problems while fixing them is still cheap. The metainfo, screenshots, and content rating you produce for it feed straight into the other two listings.</p>
+  <p style="color:var(--ink-soft);max-width:62ch;">The Mac App Store goes last despite your account already being active, because sandboxing is the only step that can force changes to application code. Better to discover that with two stores already shipped than to have it block everything.</p>
+</section>
+
+<footer>
+  <p style="margin:0 0 10px;"><strong style="color:var(--ink);">Already done in the working tree:</strong></p>
+  <ul class="plain">
+    <li><code>LICENSE</code>, <code>README.md</code>, <code>NOTICE</code></li>
+    <li><code>.github/workflows/ci.yml</code> - 3-platform build matrix</li>
+    <li><code>src/renderer/src/fonts/</code> - 4 WOFF2 files + both OFL texts</li>
+    <li><code>leaf.svg</code> - white backing square stripped; app icon and favicon repointed at the new artwork</li>
+    <li><code>.gitignore</code> - added <code>*.tsbuildinfo</code>, <code>.claude/settings.local.json</code></li>
+    <li><code>electron-builder.yml</code> - app ID <code>com.roryok.bileog</code>, plus <code>extraResources</code> for licenses</li>
+    <li><code>INSTALL.md</code> and a working signed arm64 DMG from the previous session</li>
+  </ul>
+</footer>
+
+</div>
+</body>
+</html>

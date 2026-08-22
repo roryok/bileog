@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Typecheck and compile on all three targets. Windows and Linux have never
+  # built this project before, so failures here are expected groundwork for the
+  # Microsoft Store and Flathub releases rather than regressions.
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # better-sqlite3 is a native addon; postinstall rebuilds it against
+      # Electron's headers, which needs a working toolchain on Linux.
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential python3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  # Verifies the app still packages into a launchable bundle. macOS only for
+  # now, since that is the platform with a known-good packaging config.
+  package:
+    name: Package (macOS)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Package unpacked app
+        run: npm run dist:dir
+
+      - name: Verify the bundle is signed and complete
+        run: |
+          codesign --verify --deep --strict dist/mac-arm64/Bileog.app
+          test -f "dist/mac-arm64/Bileog.app/Contents/Resources/app.asar"
+          # The native addon must sit outside the asar or dlopen() cannot load it
+          test -f "dist/mac-arm64/Bileog.app/Contents/Resources/app.asar.unpacked/node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+
+      - name: Upload app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bileog-macos-arm64
+          path: dist/mac-arm64/Bileog.app
+          retention-days: 14

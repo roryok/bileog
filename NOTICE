@@ -1,0 +1,105 @@
+# Third-party assets
+
+The source code of Bileog is MIT licensed (see LICENSE). The bundled media
+assets below are NOT covered by that license and retain their own terms.
+
+## Cover photographs and backgrounds - Pexels License
+
+Source: https://www.pexels.com  |  License: https://www.pexels.com/license/
+
+The Pexels License permits free use, including commercially, and bundling
+inside an application. It does NOT permit reselling unaltered copies or
+redistributing the photos via other stock/wallpaper platforms.
+Attribution is not required by the license; it is given here voluntarily.
+
+Files in src/assets/images/covers/ (Pexels contributor slug in each filename):
+
+  - pexels-akshay-s-1243594686-30367867.jpg
+  - pexels-ananthu-418925486-18968216.jpg
+  - pexels-face-bee-701833185-18214301.jpg
+  - pexels-ian-panelo-4002809.jpg
+  - pexels-igor-meghega-315695093-14746301.jpg
+  - pexels-jasperjoko-35224763.jpg
+  - pexels-johnpet-4317234.jpg
+  - pexels-jonathan-pagaoa-46448199-14997903.jpg
+  - pexels-konrads-photo-35049222.jpg
+  - pexels-marek-piwnicki-3907296-34792547.jpg
+  - pexels-merlin-20139057.jpg
+  - pexels-onbab-10874943.jpg
+  - pexels-onbab-10874947.jpg
+  - pexels-photo-12353410.jpg
+  - pexels-sebastiaan9977-34742150.jpg
+  - pexels-toniferreirafilms-1900184.jpg
+  - pexels-vladislovas-sketerskis-2157863731-35414271.jpg
+
+Files in src/assets/images/backgrounds/:
+
+  - bubblegum.jpg
+  - forest.jpg
+  - ocean.jpg
+  - space.jpg
+  - sunrise.jpg
+
+## Fonts - SIL Open Font License 1.1
+
+Both families are bundled in `src/renderer/src/fonts/` as WOFF2 variable fonts.
+The files are byte-for-byte as distributed by Google Fonts (the standard `latin`
+and `latin-ext` subsets); they have not been modified or re-subset here, so the
+"Quicksand" Reserved Font Name is not implicated.
+
+  - Baloo 2 - Copyright 2019 The Baloo 2 Project Authors
+    https://github.com/EkType/Baloo2
+    Full license: src/renderer/src/fonts/OFL-Baloo2.txt
+
+  - Quicksand - Copyright 2011 The Quicksand Project Authors,
+    with Reserved Font Name "Quicksand".
+    https://github.com/andrew-paglinawan/QuicksandFamily
+    Full license: src/renderer/src/fonts/OFL-Quicksand.txt
+
+The SIL OFL permits bundling and redistribution inside an application, including
+commercially, provided the license text accompanies the fonts - which is why the
+two OFL files above ship in the repository and inside the packaged app.
+
+## Bundled software dependencies
+
+Bileog ships only four npm packages at runtime; everything else in the
+dependency tree is either compiled into the renderer bundle by Vite or is
+build-time tooling that is excluded from the packaged app.
+
+  - better-sqlite3   - MIT - Copyright (c) 2017 Joshua Wise
+  - bindings         - MIT
+  - file-uri-to-path - MIT
+  - nanoid           - MIT
+
+  SQLite itself is compiled into the better-sqlite3 native addon and is in the
+  public domain (the SQLite authors disclaim copyright).
+
+  Electron - MIT - bundles Chromium and Node.js. Chromium is BSD-3-Clause and
+  its own dependencies carry a range of permissive licenses; the complete set is
+  reproduced verbatim in the packaged app at:
+
+      Contents/Resources/licenses/LICENSES.chromium.html
+      Contents/Resources/licenses/LICENSE.electron
+
+A full audit of the dependency tree (440 packages, production and development)
+found no copyleft or reciprocal licenses - no GPL, LGPL, AGPL, MPL, EPL or
+SSPL - and no package lacking a declared license. All are MIT, ISC, BSD, Apache
+2.0 or equivalently permissive, and all are compatible with distributing this
+project under the MIT license.
+
+## Application icon
+
+Current artwork (flat oak-leaf illustration), all derived from one source:
+
+  - src/assets/icons/leaf.svg      - vector master, transparent background
+  - src/assets/icons/leaf_1024.png - raster master; generates the macOS .icns
+  - src/assets/icons/leaf_512.png  - in-app favicon
+
+  TODO: confirm authorship before first public release. If drawn for this
+  project, state that here; if sourced, record the origin and license.
+
+Superseded and no longer referenced by any code:
+
+  - src/assets/icons/leaf.png - earlier photographic leaf cutout of unknown
+    origin. Delete before making the repository public rather than publishing
+    an image whose license cannot be established.
