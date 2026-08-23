@@ -98,8 +98,11 @@ Current artwork (flat oak-leaf illustration), all derived from one source:
   TODO: confirm authorship before first public release. If drawn for this
   project, state that here; if sourced, record the origin and license.
 
-Superseded and no longer referenced by any code:
+Superseded but intentionally retained:
 
-  - src/assets/icons/leaf.png - earlier photographic leaf cutout of unknown
-    origin. Delete before making the repository public rather than publishing
-    an image whose license cannot be established.
+  - src/assets/icons/leaf.png - earlier photographic leaf cutout. No longer
+    referenced by any code, so it is not compiled into the packaged app; it is
+    redistributed only as part of the source repository.
+
+  TODO: establish its origin and license before the repository is made public,
+  since publishing the repo redistributes this file.
