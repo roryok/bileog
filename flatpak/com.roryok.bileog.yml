@@ -61,20 +61,36 @@ modules:
       # no network access.
       - npm install --offline
 
+      # electron-builder 26 does not look for Electron where the generator
+      # vendored it: it passes its own cache ($XDG_CACHE_HOME/electron-builder)
+      # as the cacheRoot, misses, and reaches for github.com. Rather than chase
+      # its cache layout, skip the download path altogether - electronDist takes
+      # an already-extracted Electron and never calls @electron/get.
+      #
+      # Verified offline on a cold cache: zero network fetches, linux-unpacked
+      # produced. This also covers the icons toolset, which is fetched from
+      # electron-builder-binaries on the normal path.
+      - |
+        set -e
+        EV=$(node -p "require('./node_modules/electron/package.json').version")
+        case "$FLATPAK_ARCH" in
+          x86_64)  EA=x64 ;;
+          aarch64) EA=arm64 ;;
+          arm)     EA=armv7l ;;
+          i386)    EA=ia32 ;;
+          *) echo "unhandled FLATPAK_ARCH: $FLATPAK_ARCH" >&2; exit 1 ;;
+        esac
+        ZIP="$XDG_CACHE_HOME/electron/electron-v$EV-linux-$EA.zip"
+        test -f "$ZIP" || { echo "vendored Electron missing: $ZIP" >&2; exit 1; }
+        mkdir -p /run/build/bileog/electron-dist
+        unzip -q -o "$ZIP" -d /run/build/bileog/electron-dist
+
       # electron-builder-arch-args.sh maps the Flatpak arch onto the right
       # --x64/--arm64 flag so the same manifest builds on every architecture.
-      #
-      # electron-builder 26 does not use @electron/get's default cache: it
-      # passes its own directory ($XDG_CACHE_HOME/electron-builder) as the
-      # cacheRoot, so it never sees the Electron zip the generator vendored into
-      # $XDG_CACHE_HOME/electron and tries to fetch it from github.com.
-      # electronDownload.cache overrides that cacheRoot. It must stay on the
-      # command line rather than in electron-builder.yml, because the path only
-      # exists inside the Flatpak build.
       - |
         . ../flatpak-node/electron-builder-arch-args.sh
         npm run dist:linux -- $ELECTRON_BUILDER_ARCH_ARGS \
-          --config.electronDownload.cache="$XDG_CACHE_HOME/electron"
+          --config.electronDist=/run/build/bileog/electron-dist
 
       - cp -a dist/linux*unpacked /app/main
 
