@@ -86,7 +86,11 @@ jobs:
 
       - name: Build
         run: |
-          dbus-run-session -- flatpak run org.flatpak.Builder --force-clean --sandbox \
+          # No --sandbox here. It forbids sources outside the manifest's own
+          # directory, and the CI rewrite above points the module at the repo
+          # root (`path: ..`) one level up from flatpak/. Flathub's own build is
+          # unaffected: there the source is a git clone, not a local directory.
+          dbus-run-session -- flatpak run org.flatpak.Builder --force-clean \
             --user --install-deps-from=flathub --ccache \
             --mirror-screenshots-url=https://dl.flathub.org/media/ \
             --repo=repo builddir flatpak/com.roryok.bileog.yml

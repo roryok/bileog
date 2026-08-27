@@ -16,6 +16,12 @@ files:
   - '!tsconfig*.json'
   - '!**/*.tsbuildinfo'
   - '!.claude/*'
+  # Packaging metadata and docs for other platforms have no business inside the
+  # macOS app: the Flathub manifest, its vendored source list and its
+  # screenshots came to 3.3 MB of dead weight.
+  - '!flatpak/**'
+  - '!roadmap.html'
+  - '!build/icons/**'
   # The renderer is fully bundled by Vite and the main process externalises only
   # better-sqlite3 and nanoid, so nothing else in node_modules is reachable at
   # runtime. Shipping the rest would bloat the bundle and, more importantly,
@@ -26,6 +32,14 @@ files:
   - 'node_modules/bindings/**'
   - 'node_modules/file-uri-to-path/**'
   - 'node_modules/nanoid/**'
+  # These must come after the re-include above: patterns are applied in order,
+  # so putting them earlier let 'node_modules/better-sqlite3/**' undo them.
+  # better-sqlite3 ships its whole build tree - node-gyp intermediates and the
+  # vendored SQLite C sources - when only the compiled addon runs.
+  - '!node_modules/better-sqlite3/deps/**'
+  - '!node_modules/better-sqlite3/src/**'
+  - '!node_modules/better-sqlite3/build/**'
+  - 'node_modules/better-sqlite3/build/Release/better_sqlite3.node'
 
 # The SIL OFL requires its license text to accompany the bundled fonts, and the
 # Pexels attribution should travel with the app too. Vite only emits the .woff2
@@ -50,7 +64,7 @@ extraResources:
 # better-sqlite3 is a native .node addon: it must live on the real filesystem,
 # not inside app.asar, or dlopen() can't load it.
 asarUnpack:
-  - '**/node_modules/better-sqlite3/**'
+  - '**/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
 
 mac:
   category: public.app-category.education
@@ -71,6 +85,12 @@ mac:
 
 dmg:
   artifactName: ${productName}-${version}-${arch}.${ext}
+
+# Electron ships ~160 locale bundles, 40 MB of the framework. The app has no
+# translations, so only English is meaningful.
+electronLanguages:
+  - en
+  - en-GB
 
 linux:
   # Flatpak is the only Linux channel we target, and flatpak-builder installs
