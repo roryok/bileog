@@ -35,11 +35,30 @@ modules:
         XDG_CACHE_HOME: /run/build/bileog/flatpak-node/cache
         npm_config_cache: /run/build/bileog/flatpak-node/npm-cache
         npm_config_offline: 'true'
+        # @electron/rebuild hardcodes its headers directory as
+        # path.resolve(os.homedir(), '.electron-gyp') and assigns it straight
+        # onto node-gyp, so npm_config_devdir cannot redirect it. Pinning HOME
+        # into the build tree is the only handle on it, and keeps the build from
+        # depending on the builder's real home directory.
+        HOME: /run/build/bileog/flatpak-node
 
     build-commands:
+      # better-sqlite3's install script is `prebuild-install || node-gyp
+      # rebuild`. Offline, prebuild-install cannot reach GitHub, so node-gyp
+      # compiles it - and node-gyp needs the SDK's *node* headers, which are not
+      # vendored (generated-sources.json carries Electron's). This generated
+      # script links them into the cache. It uses relative paths, so it has to
+      # run from the build root rather than from main/.
+      - (cd .. && . flatpak-node/setup_sdk_node_headers.sh)
+
+      # Point @electron/rebuild's hardcoded ~/.electron-gyp at the vendored
+      # Electron headers, which generated-sources.json already placed in
+      # $XDG_CACHE_HOME/node-gyp/33.4.11 complete with an installVersion marker.
+      # Without this it tries to fetch them and dies on EAI_AGAIN.
+      - ln -sfn "$XDG_CACHE_HOME/node-gyp" "$HOME/.electron-gyp"
+
       # Every dependency is vendored in generated-sources.json; the build has
-      # no network access. better-sqlite3 compiles from source here because
-      # prebuild-install cannot reach GitHub, which is the intended path.
+      # no network access.
       - npm install --offline
 
       # electron-builder-arch-args.sh maps the Flatpak arch onto the right
