@@ -28,7 +28,10 @@ jobs:
       - name: Install flatpak
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends flatpak xmlstarlet
+          # dbus-daemon (not the `dbus` metapackage) is what ships
+          # /usr/bin/dbus-run-session, and --no-install-recommends means we
+          # cannot rely on the metapackage pulling it in.
+          sudo apt-get install -y --no-install-recommends flatpak dbus-daemon xmlstarlet
           flatpak remote-add --user --if-not-exists \
             flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
@@ -68,22 +71,22 @@ jobs:
 
       - name: Lint the manifest
         run: |
-          flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
+          dbus-run-session -- flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
             manifest flatpak/com.roryok.bileog.yml
 
       - name: Validate AppStream metadata
         run: |
-          flatpak run --command=appstreamcli org.flatpak.Builder \
+          dbus-run-session -- flatpak run --command=appstreamcli org.flatpak.Builder \
             validate --strict flatpak/com.roryok.bileog.metainfo.xml
 
       - name: Validate desktop entry
         run: |
-          flatpak run --command=desktop-file-validate org.flatpak.Builder \
+          dbus-run-session -- flatpak run --command=desktop-file-validate org.flatpak.Builder \
             flatpak/com.roryok.bileog.desktop
 
       - name: Build
         run: |
-          flatpak run org.flatpak.Builder --force-clean --sandbox \
+          dbus-run-session -- flatpak run org.flatpak.Builder --force-clean --sandbox \
             --user --install-deps-from=flathub --ccache \
             --mirror-screenshots-url=https://dl.flathub.org/media/ \
             --repo=repo builddir flatpak/com.roryok.bileog.yml
@@ -92,7 +95,7 @@ jobs:
       # right path, metainfo present and matching the app id, and so on.
       - name: Lint the built repository
         run: |
-          flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
+          dbus-run-session -- flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
             repo repo
 
       - name: Bundle
