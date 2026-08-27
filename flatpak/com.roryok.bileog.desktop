@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Bileog
+Comment=Write stories without distractions
+Exec=bileog
+Icon=com.roryok.bileog
+Terminal=false
+Categories=Office;WordProcessor;
+Keywords=writing;stories;kids;children;journal;
+StartupNotify=true
+StartupWMClass=Bileog

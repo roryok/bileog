@@ -7,3 +7,6 @@ dist-electron
 *.tsbuildinfo
 .claude/settings.local.json
 roadmap.html
+
+# stray compiled main bundle (identical to out/main/index.js)
+/index.js

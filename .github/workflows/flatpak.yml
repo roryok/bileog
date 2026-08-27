@@ -1,0 +1,107 @@
+name: Flatpak
+
+# Flatpak cannot be built or tested on macOS, so this workflow is the only
+# place the manifest, the AppStream metadata and the offline dependency
+# vendoring are actually exercised. Treat a red run here as a blocker for
+# Flathub submission.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'flatpak/**'
+      - 'package-lock.json'
+      - 'src/**'
+      - '.github/workflows/flatpak.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and lint Flatpak
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak xmlstarlet
+          flatpak remote-add --user --if-not-exists \
+            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      # org.flatpak.Builder bundles flatpak-builder together with
+      # flatpak-builder-lint, which is the same linter Flathub runs on
+      # submissions.
+      - name: Install builder and runtimes
+        run: |
+          flatpak install --user -y --noninteractive flathub org.flatpak.Builder
+          flatpak install --user -y --noninteractive flathub \
+            org.freedesktop.Platform//25.08 \
+            org.freedesktop.Sdk//25.08 \
+            org.freedesktop.Sdk.Extension.node24//25.08 \
+            org.electronjs.Electron2.BaseApp//25.08
+
+      # The committed manifest pins a git tag for Flathub. For CI we build the
+      # working tree instead, so a change is tested before it is ever tagged.
+      - name: Point the manifest at this checkout
+        run: |
+          python3 - <<'PY'
+          import re
+          p = 'flatpak/com.roryok.bileog.yml'
+          s = open(p).read()
+          s = re.sub(
+              r"      - type: git\n"
+              r"        url: [^\n]*\n"
+              r"        tag: [^\n]*\n"
+              r"        commit: [^\n]*\n"
+              r"        dest: main\n",
+              "      - type: dir\n        path: ..\n        dest: main\n",
+              s,
+          )
+          assert 'type: dir' in s, 'failed to rewrite the git source'
+          open(p, 'w').write(s)
+          print(s[s.index('    sources:'):])
+          PY
+
+      - name: Lint the manifest
+        run: |
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
+            manifest flatpak/com.roryok.bileog.yml
+
+      - name: Validate AppStream metadata
+        run: |
+          flatpak run --command=appstreamcli org.flatpak.Builder \
+            validate --strict flatpak/com.roryok.bileog.metainfo.xml
+
+      - name: Validate desktop entry
+        run: |
+          flatpak run --command=desktop-file-validate org.flatpak.Builder \
+            flatpak/com.roryok.bileog.desktop
+
+      - name: Build
+        run: |
+          flatpak run org.flatpak.Builder --force-clean --sandbox \
+            --user --install-deps-from=flathub --ccache \
+            --mirror-screenshots-url=https://dl.flathub.org/media/ \
+            --repo=repo builddir flatpak/com.roryok.bileog.yml
+
+      # Checks the built result, not just the manifest: icon installed at the
+      # right path, metainfo present and matching the app id, and so on.
+      - name: Lint the built repository
+        run: |
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder \
+            repo repo
+
+      - name: Bundle
+        run: |
+          flatpak build-bundle repo bileog.flatpak com.roryok.bileog \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bileog-flatpak
+          path: bileog.flatpak
+          retention-days: 14

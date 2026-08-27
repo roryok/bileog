@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.roryok.bileog</id>
+
+  <name>Bileog</name>
+  <summary>Write stories without distractions</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <developer id="com.roryok">
+    <name>Rory O'Kelly</name>
+  </developer>
+
+  <description>
+    <p>
+      Bileog is a calm, full-screen place for children to write stories. There
+      are no menus in the way and no save button to remember: drafts are written
+      to disk continuously as they type.
+    </p>
+    <p>
+      Every story gets a cover, and a timeline of earlier versions builds up as
+      the story grows, so a child can look back at how it changed and restore an
+      earlier draft if they want to.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Distraction-free editor with one story to a page</li>
+      <li>Continuous autosave, with no save button</li>
+      <li>Version timeline with one-click restore</li>
+      <li>Story covers, either chosen from a photo or generated</li>
+      <li>Several reading backgrounds and editor fonts</li>
+      <li>Export any story as HTML or PDF</li>
+      <li>Works entirely offline, with no accounts and no telemetry</li>
+    </ul>
+    <p>
+      Bileog is Irish for "leaf".
+    </p>
+  </description>
+
+  <launchable type="desktop-id">com.roryok.bileog.desktop</launchable>
+
+  <url type="homepage">https://github.com/roryok/bileog</url>
+  <url type="bugtracker">https://github.com/roryok/bileog/issues</url>
+  <url type="vcs-browser">https://github.com/roryok/bileog</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/roryok/bileog/main/flatpak/screenshots/shelf.png</image>
+      <caption>Every story on the shelf, with its own cover</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/roryok/bileog/main/flatpak/screenshots/editor.png</image>
+      <caption>Writing a story in the distraction-free editor</caption>
+    </screenshot>
+  </screenshots>
+
+  <!-- No ads, no chat, no user-generated content sharing, no data collection. -->
+  <content_rating type="oars-1.1" />
+
+  <branding>
+    <color type="primary" scheme_preference="light">#c7e6a4</color>
+    <color type="primary" scheme_preference="dark">#1f3a17</color>
+  </branding>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <releases>
+    <release version="1.0.0" date="2026-08-24">
+      <description>
+        <p>First public release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

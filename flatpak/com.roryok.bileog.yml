@@ -1,0 +1,80 @@
+app-id: com.roryok.bileog
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '25.08'
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node24
+command: bileog
+separate-locales: false
+
+# Deliberately minimal. Bileog makes no network requests, plays no audio and
+# reads no files outside its own data directory, so it asks for none of those.
+# The two file dialogs (cover picker, story export) go through the XDG desktop
+# portal, which needs no filesystem permission of its own.
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+
+build-options:
+  append-path: /usr/lib/sdk/node24/bin
+  env:
+    NPM_CONFIG_LOGLEVEL: info
+
+modules:
+  - name: bileog
+    buildsystem: simple
+    subdir: main
+
+    build-options:
+      env:
+        XDG_CACHE_HOME: /run/build/bileog/flatpak-node/cache
+        npm_config_cache: /run/build/bileog/flatpak-node/npm-cache
+        npm_config_offline: 'true'
+
+    build-commands:
+      # Every dependency is vendored in generated-sources.json; the build has
+      # no network access. better-sqlite3 compiles from source here because
+      # prebuild-install cannot reach GitHub, which is the intended path.
+      - npm install --offline
+
+      # electron-builder-arch-args.sh maps the Flatpak arch onto the right
+      # --x64/--arm64 flag so the same manifest builds on every architecture.
+      - |
+        . ../flatpak-node/electron-builder-arch-args.sh
+        npm run dist:linux -- $ELECTRON_BUILDER_ARCH_ARGS
+
+      - cp -a dist/linux*unpacked /app/main
+
+      # Launcher. zypak redirects Chromium's SUID sandbox onto the Flatpak
+      # sandbox; without it the app will not start.
+      - install -Dm755 -t /app/bin/ ../bileog
+
+      - install -Dm644 flatpak/com.roryok.bileog.metainfo.xml /app/share/metainfo/com.roryok.bileog.metainfo.xml
+      - install -Dm644 flatpak/com.roryok.bileog.desktop /app/share/applications/com.roryok.bileog.desktop
+      - install -Dm644 src/assets/icons/leaf.svg /app/share/icons/hicolor/scalable/apps/com.roryok.bileog.svg
+      - |
+        for s in 128 256 512; do
+          install -Dm644 "build/icons/${s}x${s}.png" \
+            "/app/share/icons/hicolor/${s}x${s}/apps/com.roryok.bileog.png"
+        done
+
+    sources:
+      # Flathub requires a pinned remote source. Replace the commit with the
+      # SHA that v1.0.0 points at once the repository is published.
+      - type: git
+        url: https://github.com/roryok/bileog.git
+        tag: v1.0.0
+        commit: 8824b1811950b80bedd7c5f11d08f718e2e1be2e
+        dest: main
+
+      - generated-sources.json
+
+      - type: script
+        dest-filename: bileog
+        commands:
+          - zypak-wrapper.sh /app/main/bileog "$@"
