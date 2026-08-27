@@ -3,6 +3,8 @@ import type { VersionSummary } from '../../../shared/types'
 
 interface VersionTimelineProps {
   storyId: string
+  /** Debug mode; reveals the destructive history tools. */
+  debug: boolean
   onRestore: (versionId: string) => Promise<void>
   onClose: () => void
 }
@@ -21,6 +23,7 @@ function formatTimestamp(iso: string): string {
 
 export default function VersionTimeline({
   storyId,
+  debug,
   onRestore,
   onClose
 }: VersionTimelineProps): JSX.Element {
@@ -29,6 +32,10 @@ export default function VersionTimeline({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [previewHtml, setPreviewHtml] = useState<string | null>(null)
   const [restoring, setRestoring] = useState(false)
+  // Two-step rather than a modal: debug mode is already behind a secret code,
+  // but this throws away every saved version, so it should not be one click.
+  const [confirmingClear, setConfirmingClear] = useState(false)
+  const [clearing, setClearing] = useState(false)
 
   const refresh = useCallback(async (): Promise<void> => {
     setLoading(true)
@@ -46,6 +53,19 @@ export default function VersionTimeline({
     setPreviewHtml(null)
     const html = await window.bileog.getVersionContent(versionId)
     setPreviewHtml(html)
+  }
+
+  const handleClearHistory = async (): Promise<void> => {
+    setClearing(true)
+    try {
+      await window.bileog.clearStoryHistory(storyId)
+      setSelectedId(null)
+      setPreviewHtml(null)
+      setConfirmingClear(false)
+      await refresh()
+    } finally {
+      setClearing(false)
+    }
   }
 
   const handleRestore = async (versionId: string): Promise<void> => {
@@ -111,6 +131,45 @@ export default function VersionTimeline({
                 </>
               )}
             </div>
+          </div>
+        )}
+
+        {debug && (
+          <div className="debug-strip">
+            <span className="debug-badge">Debug</span>
+            {confirmingClear ? (
+              <>
+                <span className="debug-strip-text">
+                  Delete all {versions.length} saved{' '}
+                  {versions.length === 1 ? 'version' : 'versions'}? The story itself stays.
+                </span>
+                <button
+                  className="btn btn-text"
+                  onClick={() => setConfirmingClear(false)}
+                  disabled={clearing}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => void handleClearHistory()}
+                  disabled={clearing}
+                >
+                  {clearing ? 'Deleting...' : 'Delete history'}
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="debug-strip-text">Delete this story&apos;s history.</span>
+                <button
+                  className="btn btn-text debug-action"
+                  onClick={() => setConfirmingClear(true)}
+                  disabled={versions.length === 0}
+                >
+                  Delete history
+                </button>
+              </>
+            )}
           </div>
         )}
 

@@ -2,21 +2,36 @@ import { useCallback, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
-import type { OpenedDraft } from '../../../shared/types'
+import type { OpenedDraft, StorySummary } from '../../../shared/types'
 import { useAutosave } from '../useAutosave'
 import { FontSize, FONT_SIZE_DEFAULT, FONT_SIZE_MIN, FONT_SIZE_MAX, FONT_SIZE_STEP } from '../fontSizeExtension'
 import VersionTimeline from './VersionTimeline'
+import StoryEditModal from './StoryEditModal'
 
 interface EditorProps {
   draft: OpenedDraft
+  /** Writer's name from Settings; empty when unset. */
+  author: string
+  /** Debug mode, unlocked by the code in Settings. */
+  debug: boolean
   onBack: () => void
   onOpenSettings: () => void
 }
 
-export default function Editor({ draft, onBack, onOpenSettings }: EditorProps): JSX.Element {
+export default function Editor({
+  draft,
+  author,
+  debug,
+  onBack,
+  onOpenSettings
+}: EditorProps): JSX.Element {
   const [justSaved, setJustSaved] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  // The topbar title is editable from here, so it has to live in state rather
+  // than read straight from the draft prop, which never changes after open.
+  const [title, setTitle] = useState(draft.title)
+  const [editingStory, setEditingStory] = useState<StorySummary | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -37,6 +52,26 @@ export default function Editor({ draft, onBack, onOpenSettings }: EditorProps): 
     content: draft.html,
     autofocus: 'end'
   })
+
+  const currentStory = useCallback(async (): Promise<StorySummary | undefined> => {
+    const stories = await window.bileog.listStories()
+    return stories.find((s) => s.id === draft.storyId)
+  }, [draft.storyId])
+
+  const handleEditStory = useCallback(async (): Promise<void> => {
+    const story = await currentStory()
+    if (story) setEditingStory(story)
+  }, [currentStory])
+
+  // Fires after a rename and after every cover change, so re-read the story to
+  // keep the topbar and the export filename in step.
+  const handleStoryChanged = useCallback(async (): Promise<void> => {
+    const story = await currentStory()
+    if (story) {
+      setTitle(story.title)
+      setEditingStory(story)
+    }
+  }, [currentStory])
 
   const handleSaved = useCallback((): void => {
     setJustSaved(true)
@@ -60,7 +95,7 @@ export default function Editor({ draft, onBack, onOpenSettings }: EditorProps): 
   const handleExport = async (format: 'html' | 'pdf'): Promise<void> => {
     if (!editor) return
     setExportOpen(false)
-    await window.bileog.exportStory({ title: draft.title, html: editor.getHTML(), format })
+    await window.bileog.exportStory({ title, html: editor.getHTML(), format, author })
   }
 
   const currentFontSize = (): number => {
@@ -82,7 +117,13 @@ export default function Editor({ draft, onBack, onOpenSettings }: EditorProps): 
         <button className="btn btn-text back-btn" onClick={() => void handleBack()}>
           ← Stories
         </button>
-        <div className="story-title-label">{draft.title}</div>
+        <button
+          className="story-title-label"
+          onClick={() => void handleEditStory()}
+          title="Edit title and cover"
+        >
+          {title}
+        </button>
         <div className="editor-topbar-right">
           <div className={`saved-indicator ${justSaved ? 'visible' : ''}`}>Saved</div>
           <div className="export-menu-wrap">
@@ -147,9 +188,24 @@ export default function Editor({ draft, onBack, onOpenSettings }: EditorProps): 
         <EditorContent editor={editor} />
       </div>
 
+      {editingStory && (
+        <StoryEditModal
+          story={editingStory}
+          onClose={() => setEditingStory(null)}
+          onChanged={handleStoryChanged}
+          onDeleted={() => {
+            // Not handleBack(): that flushes an autosave first, and the draft
+            // it would write belongs to a story that has just been deleted.
+            setEditingStory(null)
+            void onBack()
+          }}
+        />
+      )}
+
       {historyOpen && (
         <VersionTimeline
           storyId={draft.storyId}
+          debug={debug}
           onRestore={handleRestore}
           onClose={() => setHistoryOpen(false)}
         />

@@ -20,6 +20,8 @@ export interface FontOption {
   family: string
 }
 
+
+
 export const THEMES: ThemeOption[] = [
   { id: 'space', label: 'Space', image: spaceImg, credit: "Stars in night sky, by Engin Akyurt - https://www.pexels.com/photo/stars-in-night-sky-6138036/" },
   { id: 'daylight', label: 'Daylight', image: daylightImg, credit: "Tranquil ocean horizon at dawn, by Marianna Sigov - https://www.pexels.com/photo/tranquil-ocean-horizon-at-dawn-30923399/" },
@@ -38,6 +40,8 @@ export const FONTS: FontOption[] = [
 const THEME_KEY = 'bileog:theme'
 const FONT_KEY = 'bileog:font'
 const BG_IMAGES_KEY = 'bileog:bgImages'
+const USERNAME_KEY = 'bileog:username'
+const DEBUG_KEY = 'bileog:debug'
 const DEFAULT_THEME: ThemeId = 'space'
 const DEFAULT_FONT: FontId = 'rounded'
 
@@ -73,4 +77,34 @@ export function applyFont(font: FontId): void {
 export function applyBackgroundImages(enabled: boolean): void {
   document.documentElement.dataset.bgImages = enabled ? 'on' : 'off'
   localStorage.setItem(BG_IMAGES_KEY, String(enabled))
+}
+
+/** The writer's name, shown on covers and used to sign exported stories. Empty means unset. */
+export function getStoredUsername(): string {
+  return localStorage.getItem(USERNAME_KEY) ?? ''
+}
+
+export function setStoredUsername(name: string): void {
+  const trimmed = name.trim()
+  if (trimmed) localStorage.setItem(USERNAME_KEY, trimmed)
+  else localStorage.removeItem(USERNAME_KEY)
+}
+
+/**
+ * Typing this into the name field toggles debug mode instead of setting a name.
+ * Spaces and case are forgiving, so "Guybrush Threepwood" works too.
+ */
+const DEBUG_CODE = 'guybrush-threepwood'
+
+export function isDebugCode(value: string): boolean {
+  return value.trim().toLowerCase().replace(/\s+/g, '-') === DEBUG_CODE
+}
+
+export function getStoredDebug(): boolean {
+  return localStorage.getItem(DEBUG_KEY) === 'true'
+}
+
+export function setStoredDebug(enabled: boolean): void {
+  if (enabled) localStorage.setItem(DEBUG_KEY, 'true')
+  else localStorage.removeItem(DEBUG_KEY)
 }

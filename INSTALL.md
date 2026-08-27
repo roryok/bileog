@@ -1,6 +1,6 @@
 # Installing Bileog on another Mac
 
-The build is `dist/Bileog-0.1.0-arm64.dmg` (~106 MB). It targets **Apple Silicon
+The build is `dist/Bileog-1.0.0-arm64.dmg` (~106 MB). It targets **Apple Silicon
 Macs** (M1 and newer).
 
 ## Steps

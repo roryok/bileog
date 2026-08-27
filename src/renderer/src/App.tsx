@@ -4,6 +4,13 @@ import Dashboard from './components/Dashboard'
 import NewStoryModal from './components/NewStoryModal'
 import Editor from './components/Editor'
 import SettingsModal from './components/SettingsModal'
+import {
+  getStoredDebug,
+  getStoredUsername,
+  isDebugCode,
+  setStoredDebug,
+  setStoredUsername
+} from './settings'
 
 type View =
   | { kind: 'loading' }
@@ -15,6 +22,28 @@ export default function App(): JSX.Element {
   const [view, setView] = useState<View>({ kind: 'loading' })
   const [stories, setStories] = useState<StorySummary[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
+  // Held here rather than read from localStorage at each use site, so editing it
+  // in Settings re-renders the covers straight away.
+  const [username, setUsername] = useState(getStoredUsername())
+
+  const [debug, setDebug] = useState(getStoredDebug())
+
+  const handleUsernameChange = useCallback((name: string) => {
+    // The secret code is a toggle, not a name: flip debug mode and leave the
+    // field empty rather than signing every cover "guybrush-threepwood".
+    if (isDebugCode(name)) {
+      setDebug((on) => {
+        const next = !on
+        setStoredDebug(next)
+        return next
+      })
+      setStoredUsername('')
+      setUsername('')
+      return
+    }
+    setStoredUsername(name)
+    setUsername(name)
+  }, [])
 
   const refreshStories = useCallback(async () => {
     const list = await window.bileog.listStories()
@@ -50,6 +79,8 @@ export default function App(): JSX.Element {
     content = (
       <Editor
         draft={view.draft}
+        author={username.trim()}
+        debug={debug}
         onBack={handleBackToDashboard}
         onOpenSettings={() => setSettingsOpen(true)}
       />
@@ -66,6 +97,7 @@ export default function App(): JSX.Element {
     content = (
       <Dashboard
         stories={stories}
+        author={username.trim()}
         onOpenStory={handleOpenStory}
         onNewStory={() => setView({ kind: 'newStory' })}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -79,7 +111,17 @@ export default function App(): JSX.Element {
   return (
     <>
       {content}
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsModal
+        open={settingsOpen}
+        username={username}
+        onUsernameChange={handleUsernameChange}
+        debug={debug}
+        onDisableDebug={() => {
+          setStoredDebug(false)
+          setDebug(false)
+        }}
+        onClose={() => setSettingsOpen(false)}
+      />
     </>
   )
 }

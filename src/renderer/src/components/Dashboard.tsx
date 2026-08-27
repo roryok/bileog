@@ -4,6 +4,8 @@ import StoryEditModal from './StoryEditModal'
 
 interface DashboardProps {
   stories: StorySummary[]
+  /** Writer's name from Settings; empty when unset. */
+  author: string
   onOpenStory: (storyId: string) => void
   onNewStory: () => void
   onOpenSettings: () => void
@@ -12,6 +14,7 @@ interface DashboardProps {
 
 export default function Dashboard({
   stories,
+  author,
   onOpenStory,
   onNewStory,
   onOpenSettings,
@@ -38,7 +41,10 @@ export default function Dashboard({
           <div key={story.id} className="story-card">
             <button className="story-cover" onClick={() => onOpenStory(story.id)}>
               {story.coverUrl && <img src={story.coverUrl} alt="" />}
-              <span className="story-cover-title">{story.title}</span>
+              <span className="story-cover-title">
+                {story.title}
+                {author && <span className="story-cover-author">by {author}</span>}
+              </span>
             </button>
             <div className="story-card-footer">
               <button
@@ -58,6 +64,10 @@ export default function Dashboard({
           story={editingStory}
           onClose={() => setEditingStory(null)}
           onChanged={onStoriesChanged}
+          onDeleted={async () => {
+            setEditingStory(null)
+            await onStoriesChanged()
+          }}
         />
       )}
     </div>

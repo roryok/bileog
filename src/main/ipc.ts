@@ -1,4 +1,4 @@
-import { ipcMain, dialog, app, BrowserWindow } from 'electron'
+import { ipcMain, dialog, app, shell, BrowserWindow } from 'electron'
 import { nanoid } from 'nanoid'
 import { basename, join } from 'node:path'
 import { writeFileSync } from 'node:fs'
@@ -10,11 +10,13 @@ import {
   readVersionHtml,
   saveCoverFromUpload,
   saveGeneratedCover,
-  deleteStoryFile
+  deleteStoryFile,
+  deleteStoryDir
 } from './storage'
 import { generateCoverSvg } from './coverGenerator'
 import { toMediaUrl } from './mediaProtocol'
 import { IPC } from '../shared/ipcChannels'
+import { signedTitle } from '../shared/format'
 import type {
   StorySummary,
   OpenedDraft,
@@ -79,20 +81,24 @@ function sanitizeFilename(name: string): string {
   return cleaned || 'story'
 }
 
-function buildHtmlDocument(title: string, html: string): string {
+function buildHtmlDocument(title: string, html: string, author?: string): string {
+  const name = author?.trim()
+  const byline = name ? `<p class="byline">by ${escapeHtml(name)}</p>` : ''
   return `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>${escapeHtml(title)}</title>
+<title>${escapeHtml(signedTitle(title, author))}</title>
 <style>
   body { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.7; color: #1a1a1a; max-width: 720px; margin: 48px auto; padding: 0 24px; }
-  h1 { font-family: 'Trebuchet MS', 'Comic Sans MS', sans-serif; text-align: center; margin: 0 0 32px; }
+  h1 { font-family: 'Trebuchet MS', 'Comic Sans MS', sans-serif; text-align: center; margin: 0 0 8px; }
+  .byline { font-family: 'Trebuchet MS', 'Comic Sans MS', sans-serif; text-align: center; color: #666; margin: 0 0 32px; }
   p { margin: 0 0 1em; }
 </style>
 </head>
 <body>
 <h1>${escapeHtml(title)}</h1>
+${byline}
 ${html}
 </body>
 </html>`
@@ -243,6 +249,30 @@ export function registerIpcHandlers(): void {
     return { ok: true }
   })
 
+  ipcMain.handle(IPC.deleteStory, (_event, storyId: string): { ok: true } => {
+    const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(storyId) as
+      | StoryRow
+      | undefined
+    if (!story) throw new Error(`Story not found: ${storyId}`)
+
+    // foreign_keys is ON and the schema has no ON DELETE CASCADE, so the
+    // children have to go before the parent, and all of it in one transaction
+    // so a failure part-way cannot leave a story with orphaned drafts.
+    const removeRows = db.transaction((id: string) => {
+      db.prepare('DELETE FROM versions WHERE story_id = ?').run(id)
+      db.prepare('DELETE FROM drafts WHERE story_id = ?').run(id)
+      db.prepare('DELETE FROM stories WHERE id = ?').run(id)
+    })
+    removeRows(storyId)
+
+    // Files last: if this throws we are left with unreferenced files on disk,
+    // which is harmless, whereas the reverse order would leave rows pointing at
+    // content that no longer exists.
+    deleteStoryDir(storyId)
+
+    return { ok: true }
+  })
+
   ipcMain.handle(
     IPC.cycleStoryCover,
     (_event, input: CycleStoryCoverInput): { coverUrl: string | null } => {
@@ -274,13 +304,16 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(
     IPC.exportStory,
     async (_event, input: ExportStoryInput): Promise<ExportStoryResult> => {
-      const document = buildHtmlDocument(input.title, input.html)
+      const document = buildHtmlDocument(input.title, input.html, input.author)
       const isPdf = input.format === 'pdf'
       const extension = isPdf ? 'pdf' : 'html'
 
       const result = await dialog.showSaveDialog({
         title: 'Export story',
-        defaultPath: join(app.getPath('documents'), `${sanitizeFilename(input.title)}.${extension}`),
+        defaultPath: join(
+          app.getPath('documents'),
+          `${sanitizeFilename(signedTitle(input.title, input.author))}.${extension}`
+        ),
         filters: [
           { name: isPdf ? 'PDF Document' : 'HTML Document', extensions: [extension] }
         ]
@@ -334,6 +367,22 @@ export function registerIpcHandlers(): void {
     return rows.map((row) => ({ id: row.id, createdAt: row.created_at }))
   })
 
+  // Debug-only: drops every saved version of a story, leaving the story and its
+  // current draft alone. Rows first, then files, so a failure cannot leave rows
+  // pointing at content that is already gone.
+  ipcMain.handle(IPC.clearStoryHistory, (_event, storyId: string): { removed: number } => {
+    const story = db.prepare('SELECT id FROM stories WHERE id = ?').get(storyId)
+    if (!story) throw new Error(`Story not found: ${storyId}`)
+
+    const rows = db
+      .prepare('SELECT * FROM versions WHERE story_id = ?')
+      .all(storyId) as VersionRow[]
+    db.prepare('DELETE FROM versions WHERE story_id = ?').run(storyId)
+    for (const row of rows) deleteStoryFile(row.file_path)
+
+    return { removed: rows.length }
+  })
+
   ipcMain.handle(IPC.getVersionContent, (_event, versionId: string): string => {
     const version = db.prepare('SELECT * FROM versions WHERE id = ?').get(versionId) as
       | VersionRow
@@ -376,6 +425,21 @@ export function registerIpcHandlers(): void {
     maybeCreateVersion(draft.story_id, html)
 
     return html
+  })
+
+  // Opening a URL hands it to the OS, so only ever pass through plain web
+  // links - anything else could invoke an arbitrary protocol handler.
+  ipcMain.handle(IPC.openExternal, async (_event, url: string): Promise<void> => {
+    let parsed: URL
+    try {
+      parsed = new URL(url)
+    } catch {
+      throw new Error(`Refusing to open a malformed URL: ${url}`)
+    }
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      throw new Error(`Refusing to open a non-web URL: ${parsed.protocol}`)
+    }
+    await shell.openExternal(parsed.toString())
   })
 
   ipcMain.handle(IPC.pickCoverImage, async (): Promise<string | null> => {

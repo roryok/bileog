@@ -71,3 +71,20 @@ mac:
 
 dmg:
   artifactName: ${productName}-${version}-${arch}.${ext}
+
+linux:
+  # Flatpak is the only Linux channel we target, and flatpak-builder installs
+  # from the unpacked directory, so no distro packages are produced here.
+  target:
+    - dir
+  category: Office
+  synopsis: A distraction-free story writing app for kids
+  description: >-
+    Bileog gives children a calm, full-screen place to write stories. Every
+    story gets a cover, autosaves as they type, and keeps a timeline of earlier
+    versions they can look back through.
+  desktop:
+    entry:
+      Name: Bileog
+      Categories: Office;WordProcessor;
+      Keywords: writing;stories;kids;children;journal;

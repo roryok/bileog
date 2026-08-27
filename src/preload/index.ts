@@ -25,6 +25,9 @@ const api: BileogApi = {
   renameStory: (input: RenameStoryInput): Promise<{ ok: true }> =>
     ipcRenderer.invoke(IPC.renameStory, input),
 
+  deleteStory: (storyId: string): Promise<{ ok: true }> =>
+    ipcRenderer.invoke(IPC.deleteStory, storyId),
+
   cycleStoryCover: (input: CycleStoryCoverInput): Promise<{ coverUrl: string | null }> =>
     ipcRenderer.invoke(IPC.cycleStoryCover, input),
 
@@ -37,6 +40,9 @@ const api: BileogApi = {
   listVersions: (storyId: string): Promise<VersionSummary[]> =>
     ipcRenderer.invoke(IPC.listVersions, storyId),
 
+  clearStoryHistory: (storyId: string): Promise<{ removed: number }> =>
+    ipcRenderer.invoke(IPC.clearStoryHistory, storyId),
+
   getVersionContent: (versionId: string): Promise<string> =>
     ipcRenderer.invoke(IPC.getVersionContent, versionId),
 
@@ -44,6 +50,8 @@ const api: BileogApi = {
     ipcRenderer.invoke(IPC.restoreVersion, input),
 
   pickCoverImage: (): Promise<string | null> => ipcRenderer.invoke(IPC.pickCoverImage),
+
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke(IPC.openExternal, url),
 
   onBeforeQuit: (handler: () => Promise<void> | void): (() => void) => {
     const listener = async (): Promise<void> => {

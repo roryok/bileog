@@ -1,21 +1,32 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { StorySummary } from '../../../shared/types'
+import DeleteStoryModal from './DeleteStoryModal'
 
 interface StoryEditModalProps {
   story: StorySummary
   onClose: () => void
   onChanged: () => Promise<void>
+  /** Called once the story is gone, so the caller can leave or refresh. */
+  onDeleted: () => Promise<void> | void
 }
 
 export default function StoryEditModal({
   story,
   onClose,
-  onChanged
+  onChanged,
+  onDeleted
 }: StoryEditModalProps): JSX.Element {
   const [title, setTitle] = useState(story.title)
   const [coverUrl, setCoverUrl] = useState<string | null>(story.coverUrl)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // A click event fires on the nearest common ancestor of where the press
+  // started and where it ended. Selecting text in the title field and
+  // releasing over the backdrop therefore lands a click on the overlay, which
+  // used to dismiss the dialog mid-drag. Only treat it as a backdrop click if
+  // the press began on the backdrop too.
+  const pressedOnOverlay = useRef(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const handleRename = async (): Promise<void> => {
     const next = title.trim()
@@ -51,8 +62,36 @@ export default function StoryEditModal({
   }
 
   return (
-    <div className="modal-overlay edit-overlay" onClick={onClose}>
+    <div
+      className="modal-overlay edit-overlay"
+      onMouseDown={(e) => {
+        pressedOnOverlay.current = e.target === e.currentTarget
+      }}
+      onClick={(e) => {
+        if (pressedOnOverlay.current && e.target === e.currentTarget) onClose()
+        pressedOnOverlay.current = false
+      }}
+    >
       <div className="modal edit-modal" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="icon-btn delete-story-btn"
+          onClick={() => setConfirmingDelete(true)}
+          disabled={busy}
+          aria-label="Delete this story"
+          title="Delete this story"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path
+              d="M4 7h16M10 4h4M9 7v12m6-12v12M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
         <h1>Edit story</h1>
 
         <div className="edit-cover-row">
@@ -102,6 +141,14 @@ export default function StoryEditModal({
           </button>
         </div>
       </div>
+
+      {confirmingDelete && (
+        <DeleteStoryModal
+          story={story}
+          onCancel={() => setConfirmingDelete(false)}
+          onDeleted={onDeleted}
+        />
+      )}
     </div>
   )
 }

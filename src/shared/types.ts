@@ -47,6 +47,8 @@ export interface ExportStoryInput {
   title: string
   html: string
   format: 'html' | 'pdf'
+  /** Writer's name, when one has been set in Settings. */
+  author?: string
 }
 
 export interface ExportStoryResult {
@@ -59,12 +61,15 @@ export interface BileogApi {
   createStory: (input: CreateStoryInput) => Promise<OpenedDraft>
   openStory: (storyId: string) => Promise<OpenedDraft>
   renameStory: (input: RenameStoryInput) => Promise<{ ok: true }>
+  deleteStory: (storyId: string) => Promise<{ ok: true }>
   cycleStoryCover: (input: CycleStoryCoverInput) => Promise<{ coverUrl: string | null }>
   exportStory: (input: ExportStoryInput) => Promise<ExportStoryResult>
   saveDraft: (input: SaveDraftInput) => Promise<{ ok: true }>
   listVersions: (storyId: string) => Promise<VersionSummary[]>
+  clearStoryHistory: (storyId: string) => Promise<{ removed: number }>
   getVersionContent: (versionId: string) => Promise<string>
   restoreVersion: (input: RestoreVersionInput) => Promise<string>
   pickCoverImage: () => Promise<string | null>
+  openExternal: (url: string) => Promise<void>
   onBeforeQuit: (handler: () => Promise<void> | void) => () => void
 }

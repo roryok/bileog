@@ -1,5 +1,13 @@
 import { app } from 'electron'
-import { mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, unlinkSync } from 'node:fs'
+import {
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  copyFileSync,
+  existsSync,
+  unlinkSync,
+  rmSync
+} from 'node:fs'
 import { join, extname } from 'node:path'
 import { randomUUID } from 'node:crypto'
 
@@ -80,4 +88,9 @@ export function saveGeneratedCover(storyId: string, svgContent: string): string 
   const relativePath = join('stories', storyId, 'cover.svg')
   writeFileSync(absolutePath(relativePath), svgContent, 'utf-8')
   return relativePath
+}
+
+/** Removes a story's whole folder: drafts, versions and cover alike. */
+export function deleteStoryDir(storyId: string): void {
+  rmSync(storyDir(storyId), { recursive: true, force: true })
 }

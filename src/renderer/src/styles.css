@@ -418,6 +418,126 @@ button {
 
 .settings-modal {
   text-align: left;
+  /* The About section pushes this past the viewport on shorter displays, so the
+     dialog scrolls internally rather than overflowing off-screen. */
+  max-height: 86vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------- About ---------- */
+.about-text {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.about-link {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: var(--color-accent);
+}
+
+.about-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ---------- Picture credits ---------- */
+/* .modal-overlay is position:relative and 100vw wide, so a second one in normal
+   flow would sit beside the first rather than over it. Credits opens on top of
+   Settings, so this one is taken out of flow explicitly - and must outrank
+   .settings-overlay, which is z-index 100 and paints an opaque background. */
+.credits-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.credits-modal {
+  text-align: left;
+  width: 560px;
+  max-height: 86vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.credits-modal h1 {
+  text-align: center;
+}
+
+.credits-intro {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.credits-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  opacity: 0.85;
+}
+
+.credit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.credit-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.credit-row:last-child {
+  border-bottom: none;
+}
+
+.credit-label {
+  color: var(--color-ink);
+  font-size: 15px;
+}
+
+.credit-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  flex: none;
+}
+
+.credit-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+  text-decoration: underline;
+}
+
+.credit-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .settings-modal h1 {
@@ -565,23 +685,60 @@ button {
 }
 
 .editor-topbar {
-  display: flex;
+  /* Three equal-weight columns rather than space-between, so the title is
+     centred on the window itself and not on whatever room the buttons leave.
+     minmax(0, 1fr) stops a wide button group from stealing space and pushing
+     the title off centre. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   padding: 16px 24px;
   gap: 16px;
+}
+
+.editor-topbar .back-btn {
+  justify-self: start;
 }
 
 .editor-topbar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
   gap: 12px;
 }
 
 .story-title-label {
+  /* A button, so it needs the UA styles stripped back to the plain label it
+     looks like. Clicking it opens the same edit dialog as the dashboard. */
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
   font-family: 'Baloo 2', sans-serif;
+  font-size: inherit;
   font-weight: 700;
   color: var(--color-muted);
+  justify-self: center;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.story-title-label:hover {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.story-title-label:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  color: var(--color-ink);
 }
 
 .saved-indicator {
@@ -674,14 +831,15 @@ button {
 .editor-page {
   flex: 1;
   overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  padding: 0 24px 64px;
+  /* Deliberately not a flex container: as a flex item the editor shrank to its
+     content width, so an empty document collapsed to almost nothing and grew
+     as you typed. Block layout plus margin auto keeps the width fixed. */
+  padding: 0 0 64px;
 }
 
 .editor-page .ProseMirror {
-  width: 100%;
-  max-width: 720px;
+  width: 80%;
+  margin: 0 auto;
   font-size: 22px;
   line-height: 1.7;
   font-family: var(--font-editor);
@@ -812,6 +970,7 @@ button {
 }
 
 .edit-modal {
+  position: relative;
   width: 480px;
   max-width: 90vw;
   text-align: left;
@@ -870,4 +1029,154 @@ button {
   font-weight: 600;
   margin-bottom: 12px;
   text-align: center;
+}
+
+/* ---------- Delete story ---------- */
+.delete-story-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.delete-story-btn:hover:not(:disabled) {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.delete-story-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Sits above .edit-overlay (z-index 100), which it opens on top of. */
+.delete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 300;
+}
+
+.delete-modal {
+  text-align: left;
+}
+
+.delete-modal h1 {
+  text-align: center;
+}
+
+.delete-warning {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+  font-size: 15px;
+  text-align: center;
+}
+
+.delete-warning strong {
+  color: var(--color-ink);
+}
+
+/* The exact string to type, shown so it can be read off rather than recalled. */
+.delete-name-echo {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  user-select: all;
+  word-break: break-word;
+}
+
+.btn-danger {
+  background: #d64545;
+  color: #fff;
+  border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c13a3a;
+}
+
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- Writer's name ---------- */
+.settings-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* Sits under the title on a story card, so it reads as a byline. */
+.story-cover-author {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+}
+
+/* ---------- Debug mode ---------- */
+.debug-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(111, 214, 196, 0.16);
+  color: var(--color-accent);
+  vertical-align: 1px;
+}
+
+.debug-section {
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.debug-action {
+  color: var(--color-accent);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.debug-action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.debug-action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Sits above the timeline's own actions, visually separated from normal UI. */
+.debug-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.debug-strip-text {
+  flex: 1;
+  min-width: 180px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
