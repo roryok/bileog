@@ -90,9 +90,16 @@ jobs:
           # directory, and the CI rewrite above points the module at the repo
           # root (`path: ..`) one level up from flatpak/. Flathub's own build is
           # unaffected: there the source is a git clone, not a local directory.
+          #
+          # --compose-url-policy=full is required alongside
+          # --mirror-screenshots-url: without it the appstream catalogue keeps
+          # pointing at raw.githubusercontent.com and flatpak-builder-lint fails
+          # the repo check with appstream-external-screenshot-url and
+          # appstream-remote-icon-not-mirrored.
           dbus-run-session -- flatpak run org.flatpak.Builder --force-clean \
             --user --install-deps-from=flathub --ccache \
-            --mirror-screenshots-url=https://dl.flathub.org/media/ \
+            --compose-url-policy=full \
+            --mirror-screenshots-url=https://dl.flathub.org/media \
             --repo=repo builddir flatpak/com.roryok.bileog.yml
 
       # Checks the built result, not just the manifest: icon installed at the
