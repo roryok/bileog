@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install flatpak
         run: |
@@ -100,7 +100,7 @@ jobs:
           flatpak build-bundle repo bileog.flatpak com.roryok.bileog \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bileog-flatpak
           path: bileog.flatpak
