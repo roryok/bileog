@@ -113,7 +113,7 @@ modules:
       - type: git
         url: https://github.com/roryok/bileog.git
         tag: v1.0.0
-        commit: 8824b1811950b80bedd7c5f11d08f718e2e1be2e
+        commit: 08b32b28ec3f52a476854d66e36f2230b9b2f96b
         dest: main
 
       - generated-sources.json
