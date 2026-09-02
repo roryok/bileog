@@ -47,7 +47,6 @@ export interface ExportStoryInput {
   title: string
   html: string
   format: 'html' | 'pdf'
-  /** Writer's name, when one has been set in Settings. */
   author?: string
 }
 

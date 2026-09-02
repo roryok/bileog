@@ -1,44 +1,20 @@
-import { THEMES } from './settings'
+import { deslug } from './format'
 
 export interface ImageCredit {
-  /** Photographer's Pexels handle, or null where the filename carries no author. */
-  photographer: string | null
-  /**
-   * True where the name is a handle scraped from the download filename rather
-   * than a confirmed credit. Checked against the five hand-written background
-   * credits, filename handles matched the real photographer name only 4 times
-   * out of 5 - pexels-mccutcheon-3770703.jpg is in fact by Alexander Grey - so
-   * these are shown as handles and never asserted as authorship.
-   */
-  provisional?: boolean
-  /** What the picture is used for, shown as the row's heading. */
+  photographer: string
   label: string
   url: string
 }
 
-/**
- * Cover photographs.
- *
- * Photo ids and urls come from the Pexels download filenames, which encode
- * them. Photographer names and titles are confirmed against Pexels by hand -
- * they cannot be derived, because the handle in a filename is often stale or
- * absent (pexels-ian-panelo-4002809.jpg is by Nothing Ahead, and
- * pexels-photo-12353410.jpg names nobody at all).
- *
- * Any row still missing a label is treated as unconfirmed and renders its
- * filename handle rather than claiming authorship.
- */
-const COVER_FILES: {
+export interface ImageFile {
   file: string
-  photographer: string | null
+  photographer: string
   url: string
-  /**
-   * The photo's title on Pexels, as a slug. Its presence marks the row as
-   * checked: rows with a label show "by <name>", rows without fall back to
-   * showing the raw filename handle as "<handle> on Pexels".
-   */
-  label?: string
-}[] = [
+  label: string
+}
+
+// all the cover files we use in Bileog
+const COVER_FILES: ImageFile[] = [
   { file: "pexels-akshay-s-1243594686-30367867.jpg", label: "person-in-vibrant-digital-art-installation", photographer: "Akshay S", url: "https://www.pexels.com/photo/30367867/" },
   { file: "pexels-ananthu-418925486-18968216.jpg", label: "silhouette-of-a-person-sitting-in-a-trolley-of-an-amusement-ride", photographer: "ananthu", url: "https://www.pexels.com/photo/18968216/" },
   { file: "pexels-face-bee-701833185-18214301.jpg", label: "traditional-lanterns-and-umbrella-over-alley-in-town", photographer: "face-bee", url: "https://www.pexels.com/photo/18214301/" },
@@ -58,31 +34,20 @@ const COVER_FILES: {
   { file: "pexels-vladislovas-sketerskis-2157863731-35414271.jpg", label: "magical-snow-globe-with-santa-figure", photographer: "Vladislovas Sketerskis", url: "https://www.pexels.com/photo/35414271/" },
 ]
 
-function humanise(slug: string): string {
-  const words = slug.replace(/-/g, ' ').trim()
-  return words.charAt(0).toUpperCase() + words.slice(1)
-}
+const BACKGROUND_FILES: ImageFile[] = [
+  { file: 'pexels-enginakyurt-6138036.jpg', label: "Stars in night sky", photographer: "Engin Akyurt", url: "https://www.pexels.com/photo/stars-in-night-sky-6138036/" },
+  { file: 'pexels-marianna-sigov-2148401730-30923399.jpg', label: "Tranquil ocean horizon at dawn", photographer: "Marianna Sigov", url: "https://www.pexels.com/photo/tranquil-ocean-horizon-at-dawn-30923399/" },
+  { file: 'pexels-plato-terentev-3804555-9962794.jpg', label: "Green leaves on tree branch", photographer: "Plato Terentev", url: "https://www.pexels.com/photo/green-leaves-on-tree-branch-9962794/" },
+  { file: 'pexels-mccutcheon-3770703.jpg', label: "Pink textile in close up", photographer: "Alexander Grey", url: "https://www.pexels.com/photo/pink-textile-in-close-up-photography-3770703/" },
+  { file: 'pexels-francesco-ungaro-13075382.jpg', label: "Small waves in the ocean", photographer: "Francesco Ungaro", url: "https://www.pexels.com/photo/small-waves-in-the-ocean-13075382/" }
+]
 
-export const COVER_CREDITS: ImageCredit[] = COVER_FILES.map((c) => ({
-  photographer: c.photographer,
-  label: c.label ? humanise(c.label) : 'Story cover',
-  url: c.url,
-  provisional: !c.label
-}))
 
-/**
- * Background photographs. These already carry full titles and photographer
- * names, so they are read straight off the theme definitions.
- */
-export const BACKGROUND_CREDITS: ImageCredit[] = THEMES.map((theme) => {
-  const [description, rest] = theme.credit.split(', by ')
-  const [photographer, url] = (rest ?? '').split(' - ')
-  return {
-    photographer: photographer?.trim() || null,
-    label: `${theme.label} background - ${description}`,
-    url: (url ?? '').trim()
-  }
-})
+// export Cover Credits
+export const COVER_CREDITS: ImageCredit[] = COVER_FILES.map((c) => ({ ...c, label: deslug(c.label||'')}))
+
+// export Background Credits
+export const BACKGROUND_CREDITS: ImageCredit[] = BACKGROUND_FILES;
 
 export const PEXELS_LICENSE_URL = 'https://www.pexels.com/license/'
 export const WEBSITE_URL = 'https://roryok.com/bileog'

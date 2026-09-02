@@ -1,24 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { VersionSummary } from '../../../shared/types'
+import type { VersionSummary } from '../shared/types'
+import { formatTimestamp } from '../shared/format'
 
 interface VersionTimelineProps {
   storyId: string
-  /** Debug mode; reveals the destructive history tools. */
   debug: boolean
   onRestore: (versionId: string) => Promise<void>
   onClose: () => void
-}
-
-function formatTimestamp(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
 }
 
 export default function VersionTimeline({
@@ -32,8 +20,6 @@ export default function VersionTimeline({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [previewHtml, setPreviewHtml] = useState<string | null>(null)
   const [restoring, setRestoring] = useState(false)
-  // Two-step rather than a modal: debug mode is already behind a secret code,
-  // but this throws away every saved version, so it should not be one click.
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [clearing, setClearing] = useState(false)
 

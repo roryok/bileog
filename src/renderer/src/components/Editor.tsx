@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
-import type { OpenedDraft, StorySummary } from '../../../shared/types'
-import { useAutosave } from '../useAutosave'
+import type { OpenedDraft, StorySummary } from '../shared/types'
+import { useAutosave } from '../lib/useAutosave'
 import { FontSize, FONT_SIZE_DEFAULT, FONT_SIZE_MIN, FONT_SIZE_MAX, FONT_SIZE_STEP } from '../fontSizeExtension'
 import VersionTimeline from './VersionTimeline'
 import StoryEditModal from './StoryEditModal'
@@ -28,8 +28,6 @@ export default function Editor({
   const [justSaved, setJustSaved] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
-  // The topbar title is editable from here, so it has to live in state rather
-  // than read straight from the draft prop, which never changes after open.
   const [title, setTitle] = useState(draft.title)
   const [editingStory, setEditingStory] = useState<StorySummary | null>(null)
 
@@ -55,7 +53,7 @@ export default function Editor({
 
   const currentStory = useCallback(async (): Promise<StorySummary | undefined> => {
     const stories = await window.bileog.listStories()
-    return stories.find((s) => s.id === draft.storyId)
+    return stories.find((s: any) => s.id === draft.storyId)
   }, [draft.storyId])
 
   const handleEditStory = useCallback(async (): Promise<void> => {
@@ -145,7 +143,21 @@ export default function Editor({
             History
           </button>
           <button className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
-            ⚙
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+              <path
+                d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L14.9 3h-3.8l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h3.8l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
       </div>
@@ -194,8 +206,6 @@ export default function Editor({
           onClose={() => setEditingStory(null)}
           onChanged={handleStoryChanged}
           onDeleted={() => {
-            // Not handleBack(): that flushes an autosave first, and the draft
-            // it would write belongs to a story that has just been deleted.
             setEditingStory(null)
             void onBack()
           }}

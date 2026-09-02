@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import type { StorySummary } from '../../../shared/types'
+import type { StorySummary } from '../shared/types'
 
 interface DeleteStoryModalProps {
   story: StorySummary
@@ -17,9 +17,7 @@ export default function DeleteStoryModal({
   const [error, setError] = useState<string | null>(null)
   const pressedOnOverlay = useRef(false)
 
-  // Deliberately an exact match. Deleting a story throws away every draft and
-  // every saved version with no undo, so the confirmation should take a moment
-  // of deliberate effort rather than a stray Return.
+  // same pattern we see on github
   const matches = typed.trim() === story.title.trim()
 
   const handleDelete = async (): Promise<void> => {

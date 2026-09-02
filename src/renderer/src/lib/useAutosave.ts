@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 import type { Editor as TiptapEditor } from '@tiptap/react'
 
-const AUTOSAVE_INTERVAL_MS = 30_000
+// just internal for now. we could expose this later
+// but its a bit much complexity for a kids app
+const AUTOSAVE_INTERVAL_MS = 30 * 1000
 
-/**
- * FNV-1a over the document, paired with its length. Two drafts collide only if
- * they are byte-for-byte the same length *and* hash alike, which is remote
- * enough for a child's story while costing far less than keeping a second copy
- * of the text in memory purely to diff against.
- */
+// checksum func to check if content has diverged from what was saved
 export function checksum(html: string): string {
   let hash = 0x811c9dc5
   for (let i = 0; i < html.length; i++) {
@@ -18,57 +15,58 @@ export function checksum(html: string): string {
   return `${html.length}:${(hash >>> 0).toString(36)}`
 }
 
+// autosave the current open doc
 export function useAutosave(
   editor: TiptapEditor | null,
   draftId: string,
   onSaved: () => void
 ): { saveNow: () => Promise<void> } {
-  const dirtyRef = useRef(false)
+
+  const contentChangedRef = useRef(false)
   const savedChecksumRef = useRef<string | null>(null)
 
-  // Baseline against the editor's own serialisation rather than the HTML that
-  // came off disk: TipTap normalises whatever it parses, so comparing with the
+  // Use editor's own serialisation rather than the HTML from save 
+  // TipTap normalises whatever it parses, so comparing with the
   // stored string would report a change on every single open.
   useEffect(() => {
     if (!editor) return
     savedChecksumRef.current = checksum(editor.getHTML())
-    dirtyRef.current = false
+    contentChangedRef.current = false
   }, [editor, draftId])
 
+  // when a tiptap update event fires, mark the content as changed
   useEffect(() => {
     if (!editor) return
-    const markDirty = (): void => {
-      dirtyRef.current = true
+    const markChanged = (): void => {
+      contentChangedRef.current = true
     }
-    editor.on('update', markDirty)
+    editor.on('update', markChanged)
     return () => {
-      editor.off('update', markDirty)
+      editor.off('update', markChanged)
     }
   }, [editor])
 
   const save = useCallback(async (): Promise<void> => {
-    if (!editor || !dirtyRef.current) return
+    if (!editor || !contentChangedRef.current) return
 
     const html = editor.getHTML()
     const sum = checksum(html)
 
-    // The document was touched but ended up identical - typing a word and
-    // deleting it again, say. Nothing to write, and no "Saved" flash either.
+    // double check against ref incase this was a non-change
+    // (like typing a word and deleting it again)
     if (sum === savedChecksumRef.current) {
-      dirtyRef.current = false
+      contentChangedRef.current = false
       return
     }
 
-    // Cleared before the await so edits made *during* the write mark the draft
-    // dirty again rather than being swallowed by this save.
-    dirtyRef.current = false
+    contentChangedRef.current = false
     try {
       await window.bileog.saveDraft({ draftId, html })
       savedChecksumRef.current = sum
       onSaved()
     } catch (err) {
-      // Leave it dirty so the next tick retries instead of dropping the work.
-      dirtyRef.current = true
+      // Leave it changed so the next tick retries 
+      contentChangedRef.current = true
       console.error('Autosave failed; will retry', err)
     }
   }, [editor, draftId, onSaved])

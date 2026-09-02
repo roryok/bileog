@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { OpenedDraft } from '../../../shared/types'
+import type { OpenedDraft } from '../shared/types'
 
 interface NewStoryModalProps {
   allowCancel: boolean

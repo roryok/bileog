@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { OpenedDraft, StorySummary } from '../../shared/types'
+import type { OpenedDraft, StorySummary } from './shared/types'
 import Dashboard from './components/Dashboard'
 import NewStoryModal from './components/NewStoryModal'
 import Editor from './components/Editor'
@@ -10,7 +10,7 @@ import {
   isDebugCode,
   setStoredDebug,
   setStoredUsername
-} from './settings'
+} from './shared/settings'
 
 type View =
   | { kind: 'loading' }
@@ -22,15 +22,11 @@ export default function App(): JSX.Element {
   const [view, setView] = useState<View>({ kind: 'loading' })
   const [stories, setStories] = useState<StorySummary[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
-  // Held here rather than read from localStorage at each use site, so editing it
-  // in Settings re-renders the covers straight away.
   const [username, setUsername] = useState(getStoredUsername())
 
   const [debug, setDebug] = useState(getStoredDebug())
 
   const handleUsernameChange = useCallback((name: string) => {
-    // The secret code is a toggle, not a name: flip debug mode and leave the
-    // field empty rather than signing every cover "guybrush-threepwood".
     if (isDebugCode(name)) {
       setDebug((on) => {
         const next = !on

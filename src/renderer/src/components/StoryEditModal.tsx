@@ -1,12 +1,11 @@
 import { useRef, useState } from 'react'
-import type { StorySummary } from '../../../shared/types'
+import type { StorySummary } from '../shared/types'
 import DeleteStoryModal from './DeleteStoryModal'
 
 interface StoryEditModalProps {
   story: StorySummary
   onClose: () => void
   onChanged: () => Promise<void>
-  /** Called once the story is gone, so the caller can leave or refresh. */
   onDeleted: () => Promise<void> | void
 }
 
@@ -20,11 +19,6 @@ export default function StoryEditModal({
   const [coverUrl, setCoverUrl] = useState<string | null>(story.coverUrl)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // A click event fires on the nearest common ancestor of where the press
-  // started and where it ended. Selecting text in the title field and
-  // releasing over the backdrop therefore lands a click on the overlay, which
-  // used to dismiss the dialog mid-drag. Only treat it as a backdrop click if
-  // the press began on the backdrop too.
   const pressedOnOverlay = useRef(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 

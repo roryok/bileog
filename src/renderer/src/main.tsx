@@ -9,7 +9,7 @@ import {
   getStoredBackgroundImages,
   getStoredFont,
   getStoredTheme
-} from './settings'
+} from './shared/settings'
 
 applyTheme(getStoredTheme())
 applyFont(getStoredFont())

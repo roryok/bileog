@@ -35,6 +35,17 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/*         oooo             .o8                 oooo  
+           `888            "888                 `888  
+ .oooooooo  888   .ooooo.   888oooo.   .oooo.    888  
+888' `88b   888  d88' `88b  d88' `88b `P  )88b   888  
+888   888   888  888   888  888   888  .oP"888   888  
+`88bod8P'   888  888   888  888   888 d8(  888   888  
+`8oooooo.  o888o `Y8bod8P'  `Y8bod8P' `Y888""8o o888o 
+d"     YD                                             
+"Y88888P'                                             
+                                                      */
+
 :root {
   /* Space (dark) is the default theme */
   --color-bg: #171717;
@@ -214,8 +225,6 @@ button {
   transform: scale(0.92);
 }
 
-/* Faded theme background image, layered behind the page's own content but
-   above its solid background color. Applied to each full-screen container. */
 .dashboard,
 .editor-screen,
 .modal-overlay {
@@ -241,7 +250,86 @@ button {
   opacity: var(--bg-image-opacity-editor);
 }
 
-/* Dashboard */
+
+.settings-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.story-cover-author {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+}
+
+.debug-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(111, 214, 196, 0.16);
+  color: var(--color-accent);
+  vertical-align: 1px;
+}
+
+.debug-section {
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.debug-action {
+  color: var(--color-accent);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.debug-action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.debug-action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.debug-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.debug-strip-text {
+  flex: 1;
+  min-width: 180px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+
+/*    .o8                     oooo         .o8                                          .o8  
+     "888                     `888        "888                                         "888  
+ .oooo888   .oooo.    .oooo.o  888 .oo.    888oooo.   .ooooo.   .oooo.   oooo d8b  .oooo888  
+d88' `888  `P  )88b  d88(  "8  888P"Y88b   d88' `88b d88' `88b `P  )88b  `888""8P d88' `888  
+888   888   .oP"888  `"Y88b.   888   888   888   888 888   888  .oP"888   888     888   888  
+888   888  d8(  888  o.  )88b  888   888   888   888 888   888 d8(  888   888     888   888  
+`Y8bod88P" `Y888""8o 8""888P' o888o o888o  `Y8bod8P' `Y8bod8P' `Y888""8o d888b    `Y8bod88P" 
+                                                                                             
+                                                                                             
+                                                                                             */
 
 .dashboard {
   min-height: 100vh;
@@ -344,8 +432,6 @@ button {
   color: var(--color-primary);
 }
 
-/* Modals (new story / settings) */
-
 .modal-overlay {
   height: 100vh;
   width: 100vw;
@@ -414,18 +500,23 @@ button {
   gap: 16px;
 }
 
-/* Settings modal */
 
 .settings-modal {
   text-align: left;
-  /* The About section pushes this past the viewport on shorter displays, so the
-     dialog scrolls internally rather than overflowing off-screen. */
   max-height: 86vh;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-/* ---------- About ---------- */
+
+/*         .o8                                 .   
+          "888                               .o8   
+ .oooo.    888oooo.   .ooooo.  oooo  oooo  .o888oo 
+`P  )88b   d88' `88b d88' `88b `888  `888    888   
+ .oP"888   888   888 888   888  888   888    888   
+d8(  888   888   888 888   888  888   888    888 . 
+`Y888""8o  `Y8bod8P' `Y8bod8P'  `V88V"V8P'   "88*/
+
 .about-text {
   margin: 0;
   color: var(--color-muted);
@@ -450,11 +541,14 @@ button {
   background: rgba(255, 255, 255, 0.07);
 }
 
-/* ---------- Picture credits ---------- */
-/* .modal-overlay is position:relative and 100vw wide, so a second one in normal
-   flow would sit beside the first rather than over it. Credits opens on top of
-   Settings, so this one is taken out of flow explicitly - and must outrank
-   .settings-overlay, which is z-index 100 and paints an opaque background. */
+/*                                 .o8   o8o      .            
+                                  "888   `"'    .o8            
+ .ooooo.  oooo d8b  .ooooo.   .oooo888  oooo  .o888oo  .oooo.o 
+d88' `"Y8 `888""8P d88' `88b d88' `888  `888    888   d88(  "8 
+888        888     888ooo888 888   888   888    888   `"Y88b.  
+888   .o8  888     888    .o 888   888   888    888 . o.  )88b 
+`Y8bod8P' d888b    `Y8bod8P' `Y8bod88P" o888o   "888" 8""888*/
+
 .credits-overlay {
   position: fixed;
   inset: 0;
@@ -539,6 +633,17 @@ button {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+
+/*                     .       .    o8o                                  
+                     .o8     .o8    `"'                                  
+ .oooo.o  .ooooo.  .o888oo .o888oo oooo  ooo. .oo.    .oooooooo  .oooo.o 
+d88(  "8 d88' `88b   888     888   `888  `888P"Y88b  888' `88b  d88(  "8 
+`"Y88b.  888ooo888   888     888    888   888   888  888   888  `"Y88b.  
+o.  )88b 888    .o   888 .   888 .  888   888   888  `88bod8P'  o.  )88b 
+8""888P' `Y8bod8P'   "888"   "888" o888o o888o o888o `8oooooo.  8""888P' 
+                                                     d"     YD           
+                                                     "Y88888*/
 
 .settings-modal h1 {
   text-align: center;
@@ -676,7 +781,14 @@ button {
   background: var(--color-surface);
 }
 
-/* Editor */
+
+/*              .o8   o8o      .                      
+               "888   `"'    .o8                      
+ .ooooo.   .oooo888  oooo  .o888oo  .ooooo.  oooo d8b 
+d88' `88b d88' `888  `888    888   d88' `88b `888""8P 
+888ooo888 888   888   888    888   888   888  888     
+888    .o 888   888   888    888 . 888   888  888     
+`Y8bod8P' `Y8bod88P" o888o   "888" `Y8bod8P' d88*/
 
 .editor-screen {
   height: 100vh;
@@ -685,10 +797,6 @@ button {
 }
 
 .editor-topbar {
-  /* Three equal-weight columns rather than space-between, so the title is
-     centred on the window itself and not on whatever room the buttons leave.
-     minmax(0, 1fr) stops a wide button group from stealing space and pushing
-     the title off centre. */
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
@@ -709,8 +817,6 @@ button {
 }
 
 .story-title-label {
-  /* A button, so it needs the UA styles stripped back to the plain label it
-     looks like. Clicking it opens the same edit dialog as the dashboard. */
   appearance: none;
   background: none;
   border: none;
@@ -831,9 +937,6 @@ button {
 .editor-page {
   flex: 1;
   overflow-y: auto;
-  /* Deliberately not a flex container: as a flex item the editor shrank to its
-     content width, so an empty document collapsed to almost nothing and grew
-     as you typed. Block layout plus margin auto keeps the width fixed. */
   padding: 0 0 64px;
 }
 
@@ -856,7 +959,13 @@ button {
   pointer-events: none;
 }
 
-/* Version timeline */
+/*                                       o8o                                 
+                                         `"'                                 
+oooo    ooo  .ooooo.  oooo d8b  .oooo.o oooo   .ooooo.  ooo. .oo.    .oooo.o 
+ `88.  .8'  d88' `88b `888""8P d88(  "8 `888  d88' `88b `888P"Y88b  d88(  "8 
+  `88..8'   888ooo888  888     `"Y88b.   888  888   888  888   888  `"Y88b.  
+   `888'    888    .o  888     o.  )88b  888  888   888  888   888  o.  )88b 
+    `8'     `Y8bod8P' d888b    8""888P' o888o `Y8bod8P' o888o o888o 8""888*/
 
 .timeline-overlay {
   position: fixed;
@@ -960,7 +1069,13 @@ button {
   padding: 24px 0;
 }
 
-/* Story edit modal */
+/*                                                            
+                                                            
+ .ooooo.   .ooooo.  oooo    ooo  .ooooo.  oooo d8b  .oooo.o 
+d88' `"Y8 d88' `88b  `88.  .8'  d88' `88b `888""8P d88(  "8 
+888       888   888   `88..8'   888ooo888  888     `"Y88b.  
+888   .o8 888   888    `888'    888    .o  888     o.  )88b 
+`Y8bod8P' `Y8bod8P'     `8'     `Y8bod8P' d888b    8""888*/
 
 .edit-overlay {
   position: fixed;
@@ -1031,7 +1146,15 @@ button {
   text-align: center;
 }
 
-/* ---------- Delete story ---------- */
+
+/*    .o8            oooo                .             
+     "888            `888              .o8             
+ .oooo888   .ooooo.   888   .ooooo.  .o888oo  .ooooo.  
+d88' `888  d88' `88b  888  d88' `88b   888   d88' `88b 
+888   888  888ooo888  888  888ooo888   888   888ooo888 
+888   888  888    .o  888  888    .o   888 . 888    .o 
+`Y8bod88P" `Y8bod8P' o888o `Y8bod8P'   "888" `Y8bod8*/
+
 .delete-story-btn {
   position: absolute;
   top: 18px;
@@ -1052,7 +1175,6 @@ button {
   cursor: default;
 }
 
-/* Sits above .edit-overlay (z-index 100), which it opens on top of. */
 .delete-overlay {
   position: fixed;
   inset: 0;
@@ -1080,7 +1202,6 @@ button {
   color: var(--color-ink);
 }
 
-/* The exact string to type, shown so it can be read off rather than recalled. */
 .delete-name-echo {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
@@ -1107,76 +1228,4 @@ button {
 .btn-danger:disabled {
   opacity: 0.45;
   cursor: default;
-}
-
-/* ---------- Writer's name ---------- */
-.settings-hint {
-  margin: 10px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-muted);
-}
-
-/* Sits under the title on a story card, so it reads as a byline. */
-.story-cover-author {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-  margin-top: 2px;
-}
-
-/* ---------- Debug mode ---------- */
-.debug-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(111, 214, 196, 0.16);
-  color: var(--color-accent);
-  vertical-align: 1px;
-}
-
-.debug-section {
-  border: 1px dashed var(--color-border);
-  border-radius: 14px;
-  padding: 16px;
-}
-
-.debug-action {
-  color: var(--color-accent);
-  padding: 6px 12px;
-  border-radius: 999px;
-}
-
-.debug-action:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.debug-action:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-/* Sits above the timeline's own actions, visually separated from normal UI. */
-.debug-strip {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 12px 14px;
-  border: 1px dashed var(--color-border);
-  border-radius: 12px;
-}
-
-.debug-strip-text {
-  flex: 1;
-  min-width: 180px;
-  font-size: 13px;
-  color: var(--color-muted);
 }
