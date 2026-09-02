@@ -1,11 +1,11 @@
 {
   "name": "bileog",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A distraction-free story writing app for kids",
   "main": "./out/main/index.js",
   "author": {
     "name": "Rory O'Kelly",
-    "email": "roryok@gmail.com"
+    "email": "support@roryok.com"
   },
   "private": true,
   "type": "module",
