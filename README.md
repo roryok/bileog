@@ -38,6 +38,3 @@ Electron · electron-vite · React · TipTap · better-sqlite3 · TypeScript
 ## License
 
 Source code is [MIT](LICENSE) licensed.
-
-The bundled cover photographs, backgrounds and fonts are third-party assets
-under their own terms - see [NOTICE](NOTICE).
