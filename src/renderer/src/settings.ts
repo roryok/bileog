@@ -1,8 +1,8 @@
-import spaceImg from '../assets/images/backgrounds/pexels-enginakyurt-6138036.jpg'
-import daylightImg from '../assets/images/backgrounds/pexels-marianna-sigov-2148401730-30923399.jpg'
-import forestImg from '../assets/images/backgrounds/pexels-plato-terentev-3804555-9962794.jpg'
-import pinkImg from '../assets/images/backgrounds/pexels-mccutcheon-3770703.jpg'
-import oceanImg from '../assets/images/backgrounds/pexels-francesco-ungaro-13075382.jpg'
+import spaceImg from '../../assets/images/backgrounds/pexels-enginakyurt-6138036.jpg'
+import daylightImg from '../../assets/images/backgrounds/pexels-marianna-sigov-2148401730-30923399.jpg'
+import forestImg from '../../assets/images/backgrounds/pexels-plato-terentev-3804555-9962794.jpg'
+import pinkImg from '../../assets/images/backgrounds/pexels-mccutcheon-3770703.jpg'
+import oceanImg from '../../assets/images/backgrounds/pexels-francesco-ungaro-13075382.jpg'
 
 export type ThemeId = 'space' | 'daylight' | 'forest' | 'pink' | 'ocean'
 export type FontId = 'rounded' | 'classic' | 'simple' | 'handwriting'
