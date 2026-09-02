@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import type { StorySummary } from '../shared/types'
+import type { StorySummary } from '@shared/types'
 import DeleteStoryModal from './DeleteStoryModal'
 
 interface StoryEditModalProps {

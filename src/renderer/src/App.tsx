@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { OpenedDraft, StorySummary } from './shared/types'
+import type { OpenedDraft, StorySummary } from '@shared/types'
 import Dashboard from './components/Dashboard'
 import NewStoryModal from './components/NewStoryModal'
 import Editor from './components/Editor'
@@ -10,7 +10,7 @@ import {
   isDebugCode,
   setStoredDebug,
   setStoredUsername
-} from './shared/settings'
+} from './settings'
 
 type View =
   | { kind: 'loading' }

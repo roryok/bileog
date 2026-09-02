@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { StorySummary } from '../../../shared/types'
+import type { StorySummary } from '@shared/types'
 import StoryEditModal from './StoryEditModal'
 
 interface DashboardProps {

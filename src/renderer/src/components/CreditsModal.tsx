@@ -1,6 +1,6 @@
 import { useRef } from 'react'
-import { BACKGROUND_CREDITS, COVER_CREDITS, PEXELS_LICENSE_URL } from '../shared/credits'
-import type { ImageCredit } from '../shared/credits'
+import { BACKGROUND_CREDITS, COVER_CREDITS, PEXELS_LICENSE_URL } from '@shared/credits'
+import type { ImageCredit } from '@shared/credits'
 
 interface CreditsModalProps {
   onClose: () => void

@@ -10,9 +10,9 @@ import {
   getStoredTheme,
   type FontId,
   type ThemeId
-} from '../shared/settings'
-import { WEBSITE_URL } from '../shared/credits'
-import { signedTitle } from '../shared/format'
+} from '../settings'
+import { WEBSITE_URL } from '@shared/credits'
+import { signedTitle } from '@shared/format'
 import CreditsModal from './CreditsModal'
 
 interface SettingsModalProps {

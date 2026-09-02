@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { VersionSummary } from '../shared/types'
-import { formatTimestamp } from '../shared/format'
+import type { VersionSummary } from '@shared/types'
+import { formatTimestamp } from '@shared/format'
 
 interface VersionTimelineProps {
   storyId: string
