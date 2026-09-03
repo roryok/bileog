@@ -65,23 +65,24 @@ extraResources:
 # not inside app.asar, or dlopen() can't load it.
 asarUnpack:
   - '**/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
-
 mac:
   category: public.app-category.education
   target:
     - target: dmg
       arch:
         - arm64
-  # No Developer ID cert available, so ad-hoc sign ("-") instead. This produces a
-  # valid signature so the arm64 app will launch, but it is not notarized, so the
-  # receiving Mac has to clear the quarantine flag once (see INSTALL.md).
-  identity: '-'
+  # No "Developer ID Application:" prefix - electron-builder picks the
+  # certificate type itself and rejects the prefixed form.
+  identity: Rory O'Kelly (H2W9PZMPKN)
   # Hardened runtime only matters for notarization, and it blocks ad-hoc-signed
   # apps from loading the better-sqlite3 addon (library validation).
-  hardenedRuntime: false
+  hardenedRuntime: true
   darkModeSupport: true
   extendInfo:
     NSHumanReadableCopyright: Copyright © 2026 Rory OK
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: true
 
 dmg:
   artifactName: ${productName}-${version}-${arch}.${ext}
